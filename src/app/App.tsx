@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye, Search, ShoppingCart, User } from "lucide-react";
+import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye, Search, ShoppingCart, User, Bell } from "lucide-react";
 import {
   GH_CSS, bg, bgC, bgE, mg, vi, cy, ok, tx, txS, GM, GC,
   CartItemType, CART_INIT,
@@ -13,7 +13,7 @@ import {
   CheckoutPayDesktop, CheckoutPayMobile,
   CheckoutReviewDesktop, CheckoutReviewMobile,
   ConfirmDesktop, ConfirmMobile,
-  Product, GHLogo, NeonBtn, SimpleFooter, Bell,
+  Product, GHLogo, NeonBtn, SimpleFooter,
 } from "./shared";
 import {
   AdminDashboardDesktop, AdminDashboardMobile,
