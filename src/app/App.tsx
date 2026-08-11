@@ -861,6 +861,77 @@ export default function App() {
 
   ];
 
+  // Draggable Accessibility FAB logic
+  const [fabPos, setFabPos] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setFabPos({ x: window.innerWidth - 70, y: window.innerHeight - 70 });
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setFabPos(prev => {
+        const x = Math.min(prev.x, window.innerWidth - 60);
+        const y = Math.min(prev.y, window.innerHeight - 60);
+        return { x, y };
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const onDragStart = (clientX: number, clientY: number) => {
+    isDraggingRef.current = false;
+    dragStartRef.current = { x: clientX, y: clientY };
+    dragOffsetRef.current = { x: clientX - fabPos.x, y: clientY - fabPos.y };
+  };
+
+  const onDragMove = (clientX: number, clientY: number) => {
+    const dx = clientX - dragStartRef.current.x;
+    const dy = clientY - dragStartRef.current.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      isDraggingRef.current = true;
+    }
+    if (isDraggingRef.current) {
+      let newX = clientX - dragOffsetRef.current.x;
+      let newY = clientY - dragOffsetRef.current.y;
+      newX = Math.max(10, Math.min(newX, window.innerWidth - 60));
+      newY = Math.max(10, Math.min(newY, window.innerHeight - 60));
+      setFabPos({ x: newX, y: newY });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    onDragStart(e.clientX, e.clientY);
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      onDragMove(moveEvent.clientX, moveEvent.clientY);
+    };
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    onDragStart(touch.clientX, touch.clientY);
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      const touchMove = moveEvent.touches[0];
+      onDragMove(touchMove.clientX, touchMove.clientY);
+    };
+    const handleTouchEnd = () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd);
+  };
+
   return (
 
     <div style={{ background:bg, height:"100vh", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
@@ -1411,69 +1482,40 @@ export default function App() {
       {/* ─── Premium Accessibility Floating Action Button ─── */}
 
       {screen !== "accessibility" && (
-
         <button
-
-          onClick={() => nav("accessibility")}
-
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          onClick={(e) => {
+            if (isDraggingRef.current) {
+              e.preventDefault();
+              e.stopPropagation();
+            } else {
+              nav("accessibility");
+            }
+          }}
           title="Accesibilidad"
-
           className="neon-btn-cy"
-
           style={{
-
             position: "fixed",
-
-            bottom: 20,
-
-            right: 20,
-
+            left: fabPos.x || "calc(100vw - 70px)",
+            top: fabPos.y || "calc(100vh - 70px)",
             width: 50,
-
             height: 50,
-
             borderRadius: "50%",
-
             background: `linear-gradient(135deg, ${cy}, ${vi})`,
-
             border: "none",
-
-            cursor: "pointer",
-
+            cursor: "grab",
             color: "#0A0512",
-
             display: "flex",
-
             alignItems: "center",
-
             justifyContent: "center",
-
             boxShadow: GC,
-
             zIndex: 1000,
-
-            transition: "all 0.2s ease",
-
+            touchAction: "none",
           }}
-
-          onMouseEnter={e => {
-
-            e.currentTarget.style.transform = "scale(1.1)";
-
-          }}
-
-          onMouseLeave={e => {
-
-            e.currentTarget.style.transform = "scale(1)";
-
-          }}
-
         >
-
           <Eye size={22} />
-
         </button>
-
       )}
 
       {/* ─── Custom Premium Legal Document Modal Overlay ─── */}
