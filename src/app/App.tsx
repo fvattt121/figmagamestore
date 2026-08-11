@@ -378,73 +378,14 @@ export default function App() {
 
   }, []);
 
-  const pushedRef = useRef(false);
-
-  useEffect(() => {
-
-    if (!isMobile) return;
-
-    const hasOpenOverlay = menuOpen || notifOpen || searchOpen || !!modalType;
-
-    
-
-    if (hasOpenOverlay && !pushedRef.current) {
-
-      window.history.pushState({ overlayOpen: true }, "");
-
-      pushedRef.current = true;
-
-    } else if (!hasOpenOverlay && pushedRef.current) {
-
-      pushedRef.current = false;
-
-      if (window.history.state?.overlayOpen) {
-
-        window.history.back();
-
-      }
-
-    }
-
-    
-
-    const handlePopState = (e: PopStateEvent) => {
-
-      if (pushedRef.current) {
-
-        pushedRef.current = false;
-
-        setMenuOpen(false);
-
-        setNotifOpen(false);
-
-        setSearchOpen(false);
-
-        setModalType(null);
-
-      }
-
-    };
-
-    
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-
-      window.removeEventListener("popstate", handlePopState);
-
-    };
-
-  }, [menuOpen, notifOpen, searchOpen, modalType, isMobile]);
-
-  const [returnScreen, setReturnScreen] = useState<string | null>(null);
-
   const nav = (s:string) => {
     if (s === "orders") {
       s = "profile";
     }
     setSearchOpen(false);
+    setMenuOpen(false);
+    setNotifOpen(false);
+    setModalType(null);
 
     if (s === "login" || s === "register") {
       if (screen !== "login" && screen !== "register") {
@@ -460,42 +401,25 @@ export default function App() {
       return;
     }
 
-    const performNav = () => {
-      if (window.location.hash !== `#${s}`) {
-        window.location.hash = s;
-      }
-      setScreen(s as Screen);
-      if (s === "confirmation") {
-        const orderNum = Math.floor(Math.random() * 90000) + 10000;
-        setNotifications(prev => [
-          {
-            id: Date.now(),
-            title: "🛒 ¡Compra Completada!",
-            desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
-            date: "Ahora mismo",
-            actionLabel: "Ver Pedidos",
-            targetScreen: "profile"
-          },
-          ...prev
-        ]);
-        toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
-      }
-    };
-
-    if (isMobile && pushedRef.current) {
-      pushedRef.current = false;
-      setMenuOpen(false);
-      setNotifOpen(false);
-      setSearchOpen(false);
-      setModalType(null);
-      if (window.history.state?.overlayOpen) {
-        window.history.back();
-        setTimeout(performNav, 50);
-        return;
-      }
+    if (window.location.hash !== `#${s}`) {
+      window.location.hash = s;
     }
-
-    performNav();
+    setScreen(s as Screen);
+    if (s === "confirmation") {
+      const orderNum = Math.floor(Math.random() * 90000) + 10000;
+      setNotifications(prev => [
+        {
+          id: Date.now(),
+          title: "🛒 ¡Compra Completada!",
+          desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
+          date: "Ahora mismo",
+          actionLabel: "Ver Pedidos",
+          targetScreen: "profile"
+        },
+        ...prev
+      ]);
+      toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
+    }
   };
 
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
