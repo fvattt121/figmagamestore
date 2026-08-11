@@ -207,7 +207,7 @@ export function SupportDesktop({ onNav }:{ onNav:(s:string)=>void }) {
   };
 
   return (
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",position:"relative" }}>
+    <div style={{ background:bg,height:"calc(100vh - 56px)",overflowY:"auto",position:"relative" }} className="thin-scroll">
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -907,7 +907,7 @@ export function ChatMobile({ onNav }:{ onNav:(s:string)=>void }) {
 export function ProfileDesktop({ onNav, role="guest", user }:{ onNav:(s:string)=>void; role?:string; user?:any }) {
   if (role === "guest") {
     return (
-      <div style={{ background:bg, minHeight:"calc(100vh - 56px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"60px 24px" }}>
+      <div style={{ background:bg, height:"calc(100vh - 56px)", overflowY:"auto", display:"flex", alignItems:"center", justifyContent:"center", padding:"60px 24px" }} className="thin-scroll">
         <div style={{ background:bgC, borderRadius:20, padding:40, maxWidth:460, width:"100%", textAlign:"center", border:`1px solid rgba(139,47,214,0.25)`, boxShadow:GV }}>
           <div style={{ width:72, height:72, borderRadius:"50%", background:`rgba(139,47,214,0.15)`, border:`1px solid ${vi}44`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
             <User size={32} color={txS}/>
@@ -933,7 +933,7 @@ export function ProfileDesktop({ onNav, role="guest", user }:{ onNav:(s:string)=
   const pct       = Math.min(100, Math.round((xpInLevel/xpTotal)*100));
 
   return (
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",padding:"36px 60px" }}>
+    <div style={{ background:bg,height:"calc(100vh - 56px)",overflowY:"auto",padding:"36px 60px" }} className="thin-scroll">
       <div style={{ maxWidth:960,margin:"0 auto" }}>
         {/* Header row */}
         <div style={{ display:"grid",gridTemplateColumns:"280px 1fr 240px",gap:24,marginBottom:28 }}>
@@ -1193,7 +1193,7 @@ export function AccessibilityDesktop({ onNav }:{ onNav:(s:string)=>void }) {
   }, [cfg]);
 
   return (
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"44px 24px" }}>
+    <div style={{ background:bg,height:"calc(100vh - 56px)",overflowY:"auto",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"44px 24px" }} className="thin-scroll">
       <div style={{ width:"100%",maxWidth:820 }}>
         {/* Header */}
         <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:32 }}>
@@ -1610,7 +1610,7 @@ export function LsmDesktop({ onNav }:{ onNav:(s:string)=>void }) {
   };
 
   return (
-    <div style={{ background:bg, minHeight:"calc(100vh - 56px)", padding:"32px 24px" }}>
+    <div style={{ background:bg, height:"calc(100vh - 56px)", overflowY:"auto", padding:"32px 24px" }} className="thin-scroll">
       <style>{`
         @keyframes floatIdle {
           0% { transform: translateY(0px) rotate(0deg); }
