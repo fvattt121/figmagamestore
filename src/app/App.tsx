@@ -13,7 +13,7 @@ import {
   CheckoutPayDesktop, CheckoutPayMobile,
   CheckoutReviewDesktop, CheckoutReviewMobile,
   ConfirmDesktop, ConfirmMobile,
-  Product, GHLogo, NeonBtn,
+  Product, GHLogo, NeonBtn, SimpleFooter, Bell,
 } from "./shared";
 import {
   AdminDashboardDesktop, AdminDashboardMobile,
@@ -216,12 +216,15 @@ export default function App() {
 
   const openDetail = (_p: Product) => { setScreen("detail"); };
 
-  // Fluid responsive container for mobile viewports (no forced mock phone frame)
+  // Fluid responsive container for mobile viewports (each view scrolls vertically to SimpleFooter)
   const MobileWrapper = ({ children }: { children: React.ReactNode }) => {
     const showBottomNav = !CHECKOUT_SCREENS.includes(screen) && screen !== "search";
     return (
-      <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column" }}>
-        <div style={{ flex: 1, overflowY: "auto" }}>{children}</div>
+      <div style={{ minHeight: "calc(100vh - 56px)", background: bg, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="thin-scroll">
+          <div style={{ flex: 1 }}>{children}</div>
+          <SimpleFooter onNav={nav} mobile />
+        </div>
         {showBottomNav && <BottomNav active={screen} onNav={nav} />}
       </div>
     );
@@ -483,14 +486,21 @@ Salir
       </div>
       )}
 
-      {/* Mobile Header */}
+      {/* Mobile Header (Sticky across ALL mobile views) */}
       {isMobile && (
-        <div style={{ position:"sticky",top:0,zIndex:200,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px" }}>
-           <button onClick={() => setMenuOpen(true)} style={{ background:"none", border:"none", cursor:"pointer", color:tx, display:"flex", alignItems:"center" }}>
+        <div style={{
+          position: "sticky", top: 0, zIndex: 600,
+          background: "rgba(21,10,36,0.97)", backdropFilter: "blur(14px)",
+          height: 56, display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 16px", borderBottom: `1px solid rgba(139,47,214,0.25)`
+        }}>
+           <button onClick={() => setMenuOpen(true)} title="Menú principal" style={{ background: "none", border: "none", cursor: "pointer", color: tx, display: "flex", alignItems: "center", padding: 4 }}>
              <Menu size={24} />
            </button>
-           <GHLogo scale={0.65} />
-           <button onClick={() => setNotifOpen(true)} style={{ background:"none", border:"none", cursor:"pointer", color:tx }}>
+           <div style={{ cursor: "pointer" }} onClick={() => nav(role === "admin" ? "admin-dashboard" : "home")}>
+             <GHLogo scale={0.65} />
+           </div>
+           <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{ background: "none", border: "none", cursor: "pointer", color: tx, position: "relative", padding: 4 }}>
              <Bell size={24} />
            </button>
         </div>
@@ -498,29 +508,31 @@ Salir
 
       {/* ─── Mobile Hamburger Menu Drawer ─── */}
       {isMobile && menuOpen && (
-        <div style={{ position:"fixed", inset:0, zIndex:300, display:"flex" }}>
-          <div onClick={()=>setMenuOpen(false)} style={{ position:"absolute", inset:0, background:"rgba(6,0,16,0.85)", backdropFilter:"blur(8px)" }}/>
-          <div className="slide-r" style={{ position:"relative", width:280, height:"100%", background:bgC, borderRight:`1px solid rgba(139,47,214,0.3)`, padding:"24px 20px", display:"flex", flexDirection:"column", gap:20, zIndex:1 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <GHLogo scale={0.65} />
-              <button onClick={()=>setMenuOpen(false)} style={{ background:"none", border:"none", cursor:"pointer", color:txS }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 700, display: "flex" }}>
+          <div onClick={() => setMenuOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(6,0,16,0.85)", backdropFilter: "blur(8px)" }}/>
+          <div className="slide-r" style={{ position: "relative", width: 290, height: "100%", background: bgC, borderRight: `1px solid rgba(139,47,214,0.3)`, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, zIndex: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ cursor: "pointer" }} onClick={() => { nav("home"); setMenuOpen(false); }}>
+                <GHLogo scale={0.65} />
+              </div>
+              <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: txS, padding: 4 }}>
                 <X size={20}/>
               </button>
             </div>
-            <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8 }} className="thin-scroll">
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }} className="thin-scroll">
               {groups.map(g => {
                 if (g.adminOnly && role !== "admin") return null;
-                const gItems = visibleTabs.filter(t => t.group === g.group);
+                const gItems = SCREEN_TABS.filter(t => t.group === g.group);
                 return (
-                  <div key={g.name} style={{ display:"flex", flexDirection:"column", gap:4, marginTop:10 }}>
-                    <span className="ghi" style={{ fontSize:10, fontWeight:800, color:g.color, letterSpacing:"0.1em", paddingLeft:10 }}>{g.name.toUpperCase()}</span>
+                  <div key={g.name} style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
+                    <span className="ghi" style={{ fontSize: 10, fontWeight: 800, color: g.color, letterSpacing: "0.1em", paddingLeft: 10 }}>{g.name.toUpperCase()}</span>
                     {gItems.map(t => (
-                      <button key={t.id} onClick={()=>{ nav(t.id); setMenuOpen(false); }} style={{
-                        padding:"10px 14px", borderRadius:8, fontSize:13, fontWeight:600,
-                        textAlign:"left", cursor:"pointer", border:"none", width:"100%",
+                      <button key={t.id} onClick={() => { nav(t.id); setMenuOpen(false); }} style={{
+                        padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                        textAlign: "left", cursor: "pointer", border: "none", width: "100%",
                         background: screen === t.id ? "rgba(255,46,158,0.12)" : "transparent",
                         color: screen === t.id ? mg : tx, transition: "all 0.2s",
-                        fontFamily:"'Inter',sans-serif"
+                        fontFamily: "'Inter',sans-serif"
                       }}>
                         {t.label}
                       </button>

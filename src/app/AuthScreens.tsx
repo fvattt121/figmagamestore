@@ -175,10 +175,55 @@ export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
                 <LogIn size={16}/>ENTRAR A LA TIENDA
               </NeonBtn>
 
-              <div style={{ marginTop: 12, padding: "8px 12px", borderRadius: 8, background: "rgba(0, 240, 255, 0.08)", border: `1px solid ${cy}44`, textAlign: "center" }}>
-                <p className="ghi" style={{ fontSize: 11, color: cy, margin: 0 }}>
-                  💡 <strong>Admin:</strong> admin@gamehub.com / admin1234
-                </p>
+              {/* Administrator Credentials Helper Banner */}
+              <div style={{
+                marginTop: 16,
+                padding: "12px 14px",
+                borderRadius: 12,
+                background: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 47, 214, 0.15))",
+                border: `1px solid ${cy}66`,
+                boxShadow: `0 0 16px rgba(0, 240, 255, 0.15)`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span className="ghr" style={{ fontSize: 13, fontWeight: 700, color: cy, letterSpacing: "0.04em" }}>
+                    🛡️ CREDENCIALES DE ADMINISTRADOR
+                  </span>
+                  <a href="https://gamehub-design-system.vercel.app/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: txS, textDecoration: "underline" }}>
+                    Ver Vercel KPI ↗
+                  </a>
+                </div>
+                <div className="ghi" style={{ fontSize: 12, color: tx, background: "rgba(10,5,18,0.6)", padding: "6px 10px", borderRadius: 8, border: `1px solid rgba(255,255,255,0.08)` }}>
+                  <div><strong>Email:</strong> <code style={{ color: cy }}>admin@gamehub.com</code></div>
+                  <div><strong>Contraseña:</strong> <code style={{ color: mg }}>admin1234</code></div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    f("email", "admin@gamehub.com");
+                    f("password", "admin1234");
+                    toast.success("Credenciales de Administrador cargadas");
+                    onLogin("admin");
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    background: `linear-gradient(135deg, ${cy}, ${vi})`,
+                    border: "none",
+                    color: "#0A0512",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: GC,
+                    fontFamily: "'Rajdhani', sans-serif",
+                    letterSpacing: "0.05em",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  ⚡ AUTO-RELLENAR E INICIAR COMO ADMIN KPI
+                </button>
               </div>
 
               <div style={{ display:"flex",alignItems:"center",gap:12,margin:"22px 0" }}>
@@ -334,10 +379,55 @@ export function AuthMobile({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
               <LogIn size={20}/>ENTRAR A LA TIENDA
             </NeonBtn>
 
-            <div style={{ marginTop:16, padding:"14px 16px", borderRadius:12, background:"rgba(0,240,255,0.08)", border:`1px solid ${cy}44`, textAlign:"center" }}>
-              <p className="ghi" style={{ fontSize:13, color:cy, margin:0 }}>
-                💡 <strong>Admin:</strong> admin@gamehub.com / admin1234
-              </p>
+            {/* Administrator Credentials Helper Banner */}
+            <div style={{
+              marginTop: 18,
+              padding: "14px 16px",
+              borderRadius: 14,
+              background: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 47, 214, 0.15))",
+              border: `1px solid ${cy}66`,
+              boxShadow: `0 0 16px rgba(0, 240, 255, 0.15)`,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="ghr" style={{ fontSize: 14, fontWeight: 700, color: cy, letterSpacing: "0.04em" }}>
+                  🛡️ CREDENCIALES DE ADMIN
+                </span>
+                <a href="https://gamehub-design-system.vercel.app/" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: txS, textDecoration: "underline" }}>
+                  Panel KPI ↗
+                </a>
+              </div>
+              <div className="ghi" style={{ fontSize: 13, color: tx, background: "rgba(10,5,18,0.6)", padding: "8px 12px", borderRadius: 10, border: `1px solid rgba(255,255,255,0.08)` }}>
+                <div><strong>Email:</strong> <code style={{ color: cy }}>admin@gamehub.com</code></div>
+                <div><strong>Contraseña:</strong> <code style={{ color: mg }}>admin1234</code></div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  f("email", "admin@gamehub.com");
+                  f("password", "admin1234");
+                  toast.success("Credenciales de Administrador cargadas");
+                  onLogin("admin");
+                }}
+                style={{
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: `linear-gradient(135deg, ${cy}, ${vi})`,
+                  border: "none",
+                  color: "#0A0512",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: GC,
+                  fontFamily: "'Rajdhani', sans-serif",
+                  letterSpacing: "0.05em",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                ⚡ AUTO-RELLENAR E INICIAR COMO ADMIN KPI
+              </button>
             </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:12, margin:"28px 0" }}>

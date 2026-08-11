@@ -31,6 +31,13 @@ import {
 
 /* ─────────────── ANIMATION & GLOBAL CSS ─────────────── */
 export const GH_CSS = `
+  html, body, #root {
+    overscroll-behavior-x: none;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .ghr { font-family: 'Rajdhani', sans-serif; }
   .ghi { font-family: 'Inter', sans-serif; }
 
@@ -490,6 +497,57 @@ export function CheckoutProgress({ step, mobile=false }:{ step:1|2|3|4; mobile?:
         </div>
       ))}
     </div>
+  );
+}
+
+/* ── NEW ATOM: Simple Footer Component ── */
+export function SimpleFooter({ onNav, mobile=false }:{ onNav:(s:string)=>void; mobile?:boolean }) {
+  return (
+    <footer style={{
+      background: bgC,
+      borderTop: `1px solid rgba(139,47,214,0.25)`,
+      padding: mobile ? "24px 16px 36px" : "32px 48px",
+      marginTop: "auto",
+      width: "100%",
+      boxSizing: "border-box"
+    }}>
+      <div style={{
+        maxWidth: 1100, margin: "0 auto",
+        display: "flex", flexDirection: mobile ? "column" : "row",
+        alignItems: mobile ? "center" : "flex-start",
+        justifyContent: "space-between", gap: 20, textAlign: mobile ? "center" : "left"
+      }}>
+        <div>
+          <GHLogo scale={mobile ? 0.75 : 0.85} />
+          <p className="ghi" style={{ fontSize: 11, color: txS, marginTop: 8, maxWidth: 280 }}>
+            La plataforma líder de e-commerce gamer para hardware, visores VR y periféricos pro.
+          </p>
+        </div>
+
+        <div style={{
+          display: "flex", flexWrap: "wrap", justifyContent: mobile ? "center" : "flex-start",
+          gap: mobile ? 12 : 20
+        }}>
+          <button onClick={() => onNav("home")} style={{ background: "none", border: "none", color: tx, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Inicio</button>
+          <button onClick={() => onNav("catalog")} style={{ background: "none", border: "none", color: tx, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Catálogo</button>
+          <button onClick={() => onNav("compare")} style={{ background: "none", border: "none", color: tx, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Comparar</button>
+          <button onClick={() => onNav("support")} style={{ background: "none", border: "none", color: tx, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Soporte</button>
+          <button onClick={() => onNav("profile")} style={{ background: "none", border: "none", color: tx, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Perfil</button>
+        </div>
+
+        <div style={{ display: "flex", gap: 14, fontSize: 11, color: txS }}>
+          <span onClick={() => { if ((window as any).openTerms) (window as any).openTerms(); }} style={{ color: mg, cursor: "pointer", fontWeight: 600 }}>Términos</span>
+          <span>·</span>
+          <span onClick={() => { if ((window as any).openPrivacy) (window as any).openPrivacy(); }} style={{ color: mg, cursor: "pointer", fontWeight: 600 }}>Privacidad</span>
+        </div>
+      </div>
+
+      <div style={{ borderTop: `1px solid rgba(139,47,214,0.15)`, marginTop: 20, paddingTop: 14, textAlign: "center" }}>
+        <p className="ghi" style={{ fontSize: 10, color: txS, margin: 0 }}>
+          © 2026 GameHub Store. Todos los derechos reservados. | Tópicos de Calidad
+        </p>
+      </div>
+    </footer>
   );
 }
 
@@ -1759,11 +1817,10 @@ export function CatalogMobile({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>
     <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column",position:"relative" }}>
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)` }}>
         <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10 }}>
-          <button onClick={()=>setDrawerOpen(true)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Menu size={22}/></button>
-          <span className="ghr" style={{ fontSize:18,fontWeight:700,color:tx }}>CATÁLOGO</span>
+          <span className="ghr" style={{ fontSize:18,fontWeight:700,color:tx,letterSpacing:"0.05em" }}>EXPLORAR CATÁLOGO</span>
           <div style={{ display:"flex",gap:12 }}>
-            <button onClick={onSearch} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Search size={20}/></button>
-            <button onClick={()=>onNav("cart")} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><ShoppingCart size={20}/></button>
+            <button onClick={onSearch} title="Buscar" style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Search size={20}/></button>
+            <button onClick={()=>onNav("cart")} title="Carrito" style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><ShoppingCart size={20}/></button>
           </div>
         </div>
         <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10 }}>
