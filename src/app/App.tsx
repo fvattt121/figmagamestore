@@ -1055,21 +1055,15 @@ export default function App() {
            {/* Profile & Login/Logout button */}
 
            {role === "guest" ? (
-
-             <button onClick={() => nav("login")} style={{
-
-               padding:"7px 16px", borderRadius:8, background:`linear-gradient(135deg,${mg},${vi})`,
-
-               border:"none", color:"#fff", fontSize:12, fontWeight:700, cursor:"pointer",
-
-               fontFamily:"'Rajdhani',sans-serif", letterSpacing:"0.04em", boxShadow:GM, display:"flex", alignItems:"center", gap:6
-
-             }}>
-
-               <LogIn size={13}/> INICIAR SESIÓN
-
-             </button>
-
+             screen !== "login" && screen !== "register" && (
+               <button onClick={() => nav("login")} style={{
+                 padding:"7px 16px", borderRadius:8, background:`linear-gradient(135deg,${mg},${vi})`,
+                 border:"none", color:"#fff", fontSize:12, fontWeight:700, cursor:"pointer",
+                 fontFamily:"'Rajdhani',sans-serif", letterSpacing:"0.04em", boxShadow:GM, display:"flex", alignItems:"center", gap:6
+               }}>
+                 <LogIn size={13}/> INICIAR SESIÓN
+               </button>
+             )
            ) : (
 
              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -1185,13 +1179,11 @@ export default function App() {
              {/* Profile / Login */}
 
              {role === "guest" ? (
-
-               <button onClick={() => nav("login")} title="Iniciar Sesión" style={{ background: "none", border: "none", cursor: "pointer", color: mg, padding: 4, display: "flex" }}>
-
-                 <LogIn size={20}/>
-
-               </button>
-
+               screen !== "login" && screen !== "register" && (
+                 <button onClick={() => nav("login")} title="Iniciar Sesión" style={{ background: "none", border: "none", cursor: "pointer", color: mg, padding: 4, display: "flex" }}>
+                   <LogIn size={20}/>
+                 </button>
+               )
              ) : (
 
                <button onClick={() => nav("profile")} title="Mi Perfil" style={{ background: "none", border: "none", cursor: "pointer", color: cy, padding: 4, display: "flex" }}>
