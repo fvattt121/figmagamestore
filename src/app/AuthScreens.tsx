@@ -139,11 +139,11 @@ export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
               <h2 className="ghr" style={{ fontSize:30,fontWeight:700,color:tx,marginBottom:5,letterSpacing:"0.03em" }}>Bienvenido de vuelta</h2>
               <p className="ghi" style={{ fontSize:13,color:txS,marginBottom:28 }}>Accede a tu cuenta GameHub</p>
 
-              <AuthInput icon={AtSign} type="email" placeholder="Correo electrónico" value={form.email} onChange={v=>f("email",v)}
+              <AuthInput icon={AtSign} type="email" placeholder="correo@ejemplo.com" value={form.email} onChange={v=>f("email",v)}
                 onFocus={e=>{ const i=e?.currentTarget?.closest?.("div")?.querySelector?.("input"); if(i) i.style.boxShadow=GM; }}/>
               <div style={{ position:"relative",marginBottom:16 }}>
                 <Lock size={15} color={txS} style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",pointerEvents:"none" }}/>
-                <input type={showPw?"text":"password"} placeholder="Contraseña" value={form.password} onChange={e=>f("password",e.target.value)}
+                <input type={showPw?"text":"password"} placeholder="••••••••" value={form.password} onChange={e=>f("password",e.target.value)}
                   style={{ width:"100%",background:bgE,border:`1px solid rgba(139,47,214,0.3)`,borderRadius:12,padding:"13px 48px 13px 44px",color:tx,fontSize:14,outline:"none",fontFamily:"'Inter',sans-serif",boxSizing:"border-box",transition:"border-color 0.2s,box-shadow 0.2s" }}/>
                 <button onClick={()=>setShowPw(p=>!p)} style={{ position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:txS,display:"flex" }}>
                   {showPw?<EyeOff size={15}/>:<Eye size={15}/>}
@@ -174,57 +174,6 @@ export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
               <NeonBtn variant="primary" full onClick={handleLoginSubmit} style={{ justifyContent:"center",padding:"15px",fontSize:15,letterSpacing:"0.07em" }}>
                 <LogIn size={16}/>ENTRAR A LA TIENDA
               </NeonBtn>
-
-              {/* Administrator Credentials Helper Banner */}
-              <div style={{
-                marginTop: 16,
-                padding: "12px 14px",
-                borderRadius: 12,
-                background: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 47, 214, 0.15))",
-                border: `1px solid ${cy}66`,
-                boxShadow: `0 0 16px rgba(0, 240, 255, 0.15)`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span className="ghr" style={{ fontSize: 13, fontWeight: 700, color: cy, letterSpacing: "0.04em" }}>
-                    🛡️ CREDENCIALES DE ADMINISTRADOR
-                  </span>
-                  <a href="https://gamehub-design-system.vercel.app/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: txS, textDecoration: "underline" }}>
-                    Ver Vercel KPI ↗
-                  </a>
-                </div>
-                <div className="ghi" style={{ fontSize: 12, color: tx, background: "rgba(10,5,18,0.6)", padding: "6px 10px", borderRadius: 8, border: `1px solid rgba(255,255,255,0.08)` }}>
-                  <div><strong>Email:</strong> <code style={{ color: cy }}>admin@gamehub.com</code></div>
-                  <div><strong>Contraseña:</strong> <code style={{ color: mg }}>admin1234</code></div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    f("email", "admin@gamehub.com");
-                    f("password", "admin1234");
-                    toast.success("Credenciales de Administrador cargadas");
-                    onLogin("admin");
-                  }}
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    background: `linear-gradient(135deg, ${cy}, ${vi})`,
-                    border: "none",
-                    color: "#0A0512",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: GC,
-                    fontFamily: "'Rajdhani', sans-serif",
-                    letterSpacing: "0.05em",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  ⚡ AUTO-RELLENAR E INICIAR COMO ADMIN KPI
-                </button>
-              </div>
 
               <div style={{ display:"flex",alignItems:"center",gap:12,margin:"22px 0" }}>
                 <div style={{ flex:1,height:1,background:"rgba(139,47,214,0.2)" }}/>
@@ -344,11 +293,11 @@ export function AuthMobile({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
 
             <div style={{ position:"relative", marginBottom:16 }}>
               <AtSign size={20} color={txS} style={iconSt}/>
-              <input type="email" placeholder="Correo electrónico" value={form.email} onChange={e=>f("email",e.target.value)} style={inputSt}/>
+              <input type="email" placeholder="correo@ejemplo.com" value={form.email} onChange={e=>f("email",e.target.value)} style={inputSt}/>
             </div>
             <div style={{ position:"relative", marginBottom:22 }}>
               <Lock size={20} color={txS} style={iconSt}/>
-              <input type={showPw?"text":"password"} placeholder="Contraseña" value={form.password} onChange={e=>f("password",e.target.value)} style={{ ...inputSt, paddingRight:52 }}/>
+              <input type={showPw?"text":"password"} placeholder="••••••••" value={form.password} onChange={e=>f("password",e.target.value)} style={{ ...inputSt, paddingRight:52 }}/>
               <button type="button" onClick={()=>setShowPw(p=>!p)} style={{ position:"absolute", right:16, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:txS, display:"flex" }}>
                 {showPw?<EyeOff size={20}/>:<Eye size={20}/>}
               </button>
@@ -378,57 +327,6 @@ export function AuthMobile({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
             <NeonBtn variant="primary" full onClick={handleLoginSubmit} style={{ justifyContent:"center", padding:"20px", fontSize:18, letterSpacing:"0.07em", borderRadius:14 }}>
               <LogIn size={20}/>ENTRAR A LA TIENDA
             </NeonBtn>
-
-            {/* Administrator Credentials Helper Banner */}
-            <div style={{
-              marginTop: 18,
-              padding: "14px 16px",
-              borderRadius: 14,
-              background: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 47, 214, 0.15))",
-              border: `1px solid ${cy}66`,
-              boxShadow: `0 0 16px rgba(0, 240, 255, 0.15)`,
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span className="ghr" style={{ fontSize: 14, fontWeight: 700, color: cy, letterSpacing: "0.04em" }}>
-                  🛡️ CREDENCIALES DE ADMIN
-                </span>
-                <a href="https://gamehub-design-system.vercel.app/" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: txS, textDecoration: "underline" }}>
-                  Panel KPI ↗
-                </a>
-              </div>
-              <div className="ghi" style={{ fontSize: 13, color: tx, background: "rgba(10,5,18,0.6)", padding: "8px 12px", borderRadius: 10, border: `1px solid rgba(255,255,255,0.08)` }}>
-                <div><strong>Email:</strong> <code style={{ color: cy }}>admin@gamehub.com</code></div>
-                <div><strong>Contraseña:</strong> <code style={{ color: mg }}>admin1234</code></div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  f("email", "admin@gamehub.com");
-                  f("password", "admin1234");
-                  toast.success("Credenciales de Administrador cargadas");
-                  onLogin("admin");
-                }}
-                style={{
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  background: `linear-gradient(135deg, ${cy}, ${vi})`,
-                  border: "none",
-                  color: "#0A0512",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: GC,
-                  fontFamily: "'Rajdhani', sans-serif",
-                  letterSpacing: "0.05em",
-                  transition: "all 0.2s ease"
-                }}
-              >
-                ⚡ AUTO-RELLENAR E INICIAR COMO ADMIN KPI
-              </button>
-            </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:12, margin:"28px 0" }}>
               <div style={{ flex:1, height:1, background:"rgba(139,47,214,0.2)" }}/>
