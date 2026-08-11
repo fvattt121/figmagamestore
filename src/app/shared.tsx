@@ -3687,9 +3687,9 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
 
             {cartItems.length===0?(
 
-              <div style={{ textAlign:"center",padding:"80px 0",background:bgC,borderRadius:20,border:`1px solid rgba(139,47,214,0.2)` }}>
+              <div style={{ textAlign:"center",padding:"80px 24px",background:bgC,borderRadius:20,border:`1px solid rgba(139,47,214,0.2)` }}>
 
-                <ShoppingCart size={56} color={txS} style={{ opacity:0.25,marginBottom:18 }}/>
+                <ShoppingCart size={56} color={txS} style={{ display:"block",margin:"0 auto 18px",opacity:0.25 }}/>
 
                 <p className="ghr" style={{ fontSize:26,color:txS,letterSpacing:"0.04em" }}>Tu carrito está vacío</p>
 
@@ -3945,9 +3945,9 @@ export function CartMobile({ onNav, cartItems, setCartItems }:{
 
         {cartItems.length===0?(
 
-          <div style={{ textAlign:"center",padding:"60px 0" }}>
+          <div style={{ textAlign:"center",padding:"60px 16px" }}>
 
-            <ShoppingCart size={40} color={txS} style={{ opacity:0.3,marginBottom:12 }}/>
+            <ShoppingCart size={40} color={txS} style={{ display:"block",margin:"0 auto 12px",opacity:0.3 }}/>
 
             <p className="ghi" style={{ fontSize:14,color:txS }}>Tu carrito está vacío</p>
 
