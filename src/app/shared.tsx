@@ -3335,7 +3335,9 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 
                 }}>
 
-                  <NeonBtn variant="primary" full onClick={()=>onNav("cart")}><ShoppingCart size={13}/>Agregar al carrito</NeonBtn>
+                  <NeonBtn variant="primary" full onClick={() => {
+                    if ((window as any).addToCart) (window as any).addToCart(p);
+                  }}><ShoppingCart size={13}/>Agregar al carrito</NeonBtn>
 
                   <NeonBtn variant="ghost" full onClick={()=>onNav("detail")}>Ver producto</NeonBtn>
 
@@ -3649,10 +3651,10 @@ export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
 
         {cmpProds.map(p=>(
 
-          <button key={p.id} onClick={()=>onNav("cart")} className="neon-btn" style={{ padding:"8px 2px",borderRadius:8,background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",color:"#fff",fontSize:9,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",lineHeight:1.1 }}>
-
+          <button key={p.id} onClick={() => {
+            if ((window as any).addToCart) (window as any).addToCart(p);
+          }} className="neon-btn" style={{ padding:"8px 2px",borderRadius:8,background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",color:"#fff",fontSize:9,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",lineHeight:1.1 }}>
             COMPRAR<br/><span style={{ fontSize:10 }}>${p.price}</span>
-
           </button>
 
         ))}

@@ -436,61 +436,48 @@ export default function App() {
 
   }, [menuOpen, notifOpen, searchOpen, modalType, isMobile]);
 
-  const nav = (s:string) => {
+  const [returnScreen, setReturnScreen] = useState<string | null>(null);
 
+  const nav = (s:string) => {
     setSearchOpen(false);
 
+    if (s === "login" || s === "register") {
+      if (screen !== "login" && screen !== "register") {
+        setReturnScreen(screen);
+      }
+    }
+
     // Auth guard for guest users accessing profile or checkout
-
     if (role === "guest" && (s === "profile" || s.startsWith("checkout"))) {
-
       toast.info("Inicia sesión para acceder a tu perfil y realizar compras.", { position: "bottom-right" });
-
+      setReturnScreen(s);
       setScreen("login");
-
       return;
-
     }
 
     if (window.location.hash !== `#${s}`) {
-
       window.location.hash = s;
-
     }
 
     setScreen(s as Screen);
 
     if (s === "confirmation") {
-
       const orderNum = Math.floor(Math.random() * 90000) + 10000;
-
       setNotifications(prev => [
-
         {
-
           id: Date.now(),
-
           title: "🛒 ¡Compra Completada!",
-
           desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
-
           date: "Ahora mismo",
-
           actionLabel: "Ver Pedidos",
-
           targetScreen: "profile"
-
         },
-
         ...prev
-
       ]);
-
       toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
-
     }
-
   };
+
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
   const [currentUser, setCurrentUser] = useState<any>({
     name: "Usuario Gamer",
@@ -529,7 +516,9 @@ export default function App() {
         totalSpent: 890,
         email: userEmail
       });
-      nav("home");
+      const target = returnScreen || "home";
+      setReturnScreen(null);
+      nav(target);
     }
   };
   const logout = () => { setRole("guest"); setMenuOpen(false); };
@@ -1359,7 +1348,7 @@ export default function App() {
             <button onClick={()=>nav("home")} style={{ position:"absolute", top:20, left:24, zIndex:100, padding:"8px 16px", borderRadius:10, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:600, display:"flex", alignItems:"center", gap:6 }}>
               ← Volver a la Tienda
             </button>
-            <AuthDesktop onLogin={login}/>
+            <AuthDesktop onLogin={login} initialTab={screen === "register" ? "register" : "login"}/>
           </div>
         )}
         {(screen==="login"||screen==="register")&&isMobile&&(
@@ -1367,7 +1356,7 @@ export default function App() {
             <button onClick={()=>nav("home")} style={{ position:"absolute", top:12, left:16, zIndex:100, padding:"6px 12px", borderRadius:8, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600 }}>
               ← Tienda
             </button>
-            <AuthMobile onLogin={login}/>
+            <AuthMobile onLogin={login} initialTab={screen === "register" ? "register" : "login"}/>
           </div>
         )}
 

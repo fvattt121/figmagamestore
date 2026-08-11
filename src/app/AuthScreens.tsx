@@ -43,12 +43,16 @@ export function PwStrength({ pw }: { pw:string }) {
 
 /* ── Auth Desktop ─────────────────────── */
 
-export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
-  const [tab,           setTab]           = useState<AuthTab>("login");
+export function AuthDesktop({ onLogin, initialTab="login" }:{ onLogin:(r:AuthRole, email?:string)=>void; initialTab?:AuthTab }) {
+  const [tab,           setTab]           = useState<AuthTab>(initialTab);
   const [showPw,        setShowPw]        = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [form,          setForm]          = useState({ name:"",email:"",password:"",remember:false });
   const f = (k:string,v:string|boolean) => setForm(p=>({ ...p,[k]:v }));
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     (window as any).onTermsAcceptedFromModal = () => {
@@ -61,7 +65,7 @@ export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
 
   const handleLoginSubmit = () => {
     const isAdmin = form.email.toLowerCase() === "admin@gamehub.com" && form.password === "admin1234";
-    onLogin(isAdmin ? "admin" : "user");
+    onLogin(isAdmin ? "admin" : "user", form.email);
   };
 
   const PROMOS = [
@@ -231,12 +235,16 @@ export function AuthDesktop({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
 
 /* ── Auth Mobile ───────────────────────── */
 
-export function AuthMobile({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
-  const [tab,           setTab]           = useState<AuthTab>("login");
+export function AuthMobile({ onLogin, initialTab="login" }:{ onLogin:(r:AuthRole, email?:string)=>void; initialTab?:AuthTab }) {
+  const [tab,           setTab]           = useState<AuthTab>(initialTab);
   const [showPw,        setShowPw]        = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [form,          setForm]          = useState({ name:"",email:"",password:"",remember:false });
   const f = (k:string,v:string|boolean) => setForm(p => ({ ...p,[k]:v }));
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     (window as any).onTermsAcceptedFromModal = () => { setTermsAccepted(true); };
@@ -245,7 +253,7 @@ export function AuthMobile({ onLogin }:{ onLogin:(r:AuthRole)=>void }) {
 
   const handleLoginSubmit = () => {
     const isAdmin = form.email.toLowerCase() === "admin@gamehub.com" && form.password === "admin1234";
-    onLogin(isAdmin ? "admin" : "user");
+    onLogin(isAdmin ? "admin" : "user", form.email);
   };
 
   const inputSt: React.CSSProperties = {
