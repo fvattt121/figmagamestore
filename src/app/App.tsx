@@ -194,6 +194,14 @@ export default function App() {
 
   const nav = (s:string) => {
     setSearchOpen(false);
+
+    // Auth guard for guest users accessing profile or checkout
+    if (role === "guest" && (s === "profile" || s.startsWith("checkout"))) {
+      toast.info("Inicia sesión para acceder a tu perfil y realizar compras.", { position: "bottom-right" });
+      setScreen("login");
+      return;
+    }
+
     setScreen(s as Screen);
     if (s === "confirmation") {
       const orderNum = Math.floor(Math.random() * 90000) + 10000;
@@ -529,17 +537,51 @@ export default function App() {
           position: "sticky", top: 0, zIndex: 600,
           background: "rgba(21,10,36,0.97)", backdropFilter: "blur(14px)",
           height: 56, display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 16px", borderBottom: `1px solid rgba(139,47,214,0.25)`
+          padding: "0 14px", borderBottom: `1px solid rgba(139,47,214,0.25)`
         }}>
            <button onClick={() => setMenuOpen(true)} title="Menú principal" style={{ background: "none", border: "none", cursor: "pointer", color: tx, display: "flex", alignItems: "center", padding: 4 }}>
-             <Menu size={24} />
+             <Menu size={22} />
            </button>
+
            <div style={{ cursor: "pointer" }} onClick={() => nav(role === "admin" ? "admin-dashboard" : "home")}>
-             <GHLogo scale={0.65} />
+             <GHLogo scale={0.6} />
            </div>
-           <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{ background: "none", border: "none", cursor: "pointer", color: tx, position: "relative", padding: 4 }}>
-             <Bell size={24} />
-           </button>
+
+           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+             {/* Search */}
+             <button onClick={() => setSearchOpen(true)} title="Buscar" style={{ background: "none", border: "none", cursor: "pointer", color: txS, padding: 4, display: "flex" }}>
+               <Search size={20} color={cy}/>
+             </button>
+
+             {/* Cart with live badge */}
+             <button onClick={() => nav("cart")} title="Carrito" style={{ background: "none", border: "none", cursor: "pointer", color: cartItems.length>0?mg:txS, position: "relative", padding: 4, display: "flex" }}>
+               <ShoppingCart size={20}/>
+               {cartItems.length > 0 && (
+                 <span style={{ position: "absolute", top: -2, right: -4, background: mg, color: "#fff", fontSize: 9, fontWeight: 700, borderRadius: 10, padding: "1px 4px", minWidth: 14, textAlign: "center" }}>
+                   {cartItems.length}
+                 </span>
+               )}
+             </button>
+
+             {/* Notification Bell */}
+             <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{ background: "none", border: "none", cursor: "pointer", color: txS, position: "relative", padding: 4, display: "flex" }}>
+               <Bell size={20} />
+               {notifications.length > 0 && (
+                 <span style={{ position: "absolute", top: 2, right: 2, width: 6, height: 6, borderRadius: "50%", background: mg }} />
+               )}
+             </button>
+
+             {/* Profile / Login */}
+             {role === "guest" ? (
+               <button onClick={() => nav("login")} title="Iniciar Sesión" style={{ background: "none", border: "none", cursor: "pointer", color: mg, padding: 4, display: "flex" }}>
+                 <LogIn size={20}/>
+               </button>
+             ) : (
+               <button onClick={() => nav("profile")} title="Mi Perfil" style={{ background: "none", border: "none", cursor: "pointer", color: cy, padding: 4, display: "flex" }}>
+                 <User size={20}/>
+               </button>
+             )}
+           </div>
         </div>
       )}
 

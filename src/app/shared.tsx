@@ -1478,7 +1478,13 @@ export function ProductDetailDesktop({ onNav, onSearch }:{ onNav:(s:string)=>voi
                 <span className="ghi" style={{ width:30,textAlign:"center",color:tx,fontWeight:700 }}>{qty}</span>
                 <button onClick={()=>setQty(q=>q+1)} style={{ width:38,height:44,background:"none",border:"none",cursor:"pointer",color:txS,display:"flex",alignItems:"center",justifyContent:"center" }}><Plus size={14}/></button>
               </div>
-              <button className="neon-btn" onClick={()=>onNav("cart")} style={{ flex:1,padding:"12px",background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",borderRadius:10,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
+              <button className="neon-btn" onClick={() => {
+                if ((window as any).addToCart) {
+                  (window as any).addToCart({ ...p, price: p.price, qty });
+                } else {
+                  toast.success(`${p.name} añadido al carrito`, { duration: 1800, position: "bottom-right" });
+                }
+              }} style={{ flex:1,padding:"12px",background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",borderRadius:10,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
                 AGREGAR AL CARRITO — ${(p.price*qty).toFixed(2)}
               </button>
             </div>
@@ -1558,7 +1564,13 @@ export function ProductDetailMobile({ onBack }:{ onBack:()=>void }) {
           <span className="ghi" style={{ width:26,textAlign:"center",color:tx,fontWeight:700 }}>{qty}</span>
           <button onClick={()=>setQty(q=>q+1)} style={{ width:36,height:44,background:"none",border:"none",cursor:"pointer",color:txS,display:"flex",alignItems:"center",justifyContent:"center" }}><Plus size={14}/></button>
         </div>
-        <button className="neon-btn" style={{ flex:1,padding:"14px",background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
+        <button className="neon-btn" onClick={() => {
+          if ((window as any).addToCart) {
+            (window as any).addToCart({ ...p, price: p.price, qty });
+          } else {
+            toast.success(`${p.name} añadido al carrito`, { duration: 1800, position: "bottom-right" });
+          }
+        }} style={{ flex:1,padding:"14px",background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
           AGREGAR — ${(p.price*qty).toFixed(2)}
         </button>
       </div>
@@ -1676,6 +1688,9 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
                 <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>{p.badges.slice(0,2).map(b=><Badge key={b} label={b}/>)}</div>
                 <p className="ghr" style={{ fontSize:15,fontWeight:700,color:tx,lineHeight:1.25 }}>{p.name}</p>
                 <PriceTag price={p.price} orig={p.orig}/>
+                <NeonBtn variant="ghost" small onClick={() => {
+                  if ((window as any).addToCart) (window as any).addToCart(p);
+                }} style={{ marginTop: 4, fontSize: 11 }}><ShoppingCart size={12}/> + Carrito</NeonBtn>
               </div>
             ))}
             {/* Empty add-product slot */}
@@ -2141,7 +2156,13 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
               {sub>300&&<p className="ghi" style={{ fontSize:11,color:ok,marginTop:5,textAlign:"right",fontWeight:700 }}>✓ Envío gratuito desbloqueado</p>}
             </div>
 
-            <NeonBtn variant="primary" full onClick={()=>onNav("checkout-1")} style={{ padding:"16px",fontSize:16,letterSpacing:"0.05em",justifyContent:"center" }}>
+            <NeonBtn variant="primary" full onClick={() => {
+              if (cartItems.length === 0) {
+                toast.error("Tu carrito está vacío. Añade productos para continuar.");
+                return;
+              }
+              onNav("checkout-1");
+            }} style={{ padding:"16px",fontSize:16,letterSpacing:"0.05em",justifyContent:"center" }}>
               PROCEDER AL PAGO <ArrowRight size={17}/>
             </NeonBtn>
 
@@ -2208,7 +2229,13 @@ export function CartMobile({ onNav, cartItems, setCartItems }:{
             <span className="ghi" style={{ fontSize:12,color:txS }}>Total a pagar</span>
             <span className="ghr" style={{ fontSize:18,fontWeight:700,color:mg }}>${total.toFixed(2)}</span>
           </div>
-          <NeonBtn variant="primary" full onClick={()=>onNav("checkout-1")} style={{ padding:"14px",fontSize:15,justifyContent:"center" }}>
+          <NeonBtn variant="primary" full onClick={() => {
+            if (cartItems.length === 0) {
+              toast.error("Tu carrito está vacío. Añade productos para continuar.");
+              return;
+            }
+            onNav("checkout-1");
+          }} style={{ padding:"14px",fontSize:15,justifyContent:"center" }}>
             Pagar <ArrowRight size={15}/>
           </NeonBtn>
         </div>
