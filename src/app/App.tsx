@@ -468,7 +468,7 @@ export default function App() {
       nav(target);
     }
   };
-  const logout = () => { setRole("guest"); setMenuOpen(false); };
+  const logout = () => { setRole("guest"); setMenuOpen(false); nav("home"); };
 
   const openDetail = (p: Product) => {
     if (p) setSelectedProduct(p);
