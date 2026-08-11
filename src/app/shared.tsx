@@ -1365,8 +1365,14 @@ export function CatalogDesktop({ onNav, onSearch, onDetail }:{ onNav:(s:string)=
 }
 
 
-export function ProductDetailDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onSearch:()=>void }) {
-  const p = PRODUCT_DETAIL;
+export function ProductDetailDesktop({ onNav, onSearch, product }:{ onNav:(s:string)=>void; onSearch:()=>void; product?:Product }) {
+  const baseP = product || PRODUCTS[0];
+  const p = {
+    ...PRODUCT_DETAIL,
+    ...baseP,
+    description: baseP.sub + " — Hardware gamer de alta precisión y calidad profesional.",
+    gallery: [baseP.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"],
+  };
   const [selImg,     setSelImg]     = useState(0);
   const [selVariant, setSelVariant] = useState(0);
   const [qty,        setQty]        = useState(1);
@@ -1458,8 +1464,14 @@ export function ProductDetailDesktop({ onNav, onSearch }:{ onNav:(s:string)=>voi
   );
 }
 
-export function ProductDetailMobile({ onBack }:{ onBack:()=>void }) {
-  const p = PRODUCT_DETAIL;
+export function ProductDetailMobile({ onBack, product }:{ onBack:()=>void; product?:Product }) {
+  const baseP = product || PRODUCTS[0];
+  const p = {
+    ...PRODUCT_DETAIL,
+    ...baseP,
+    description: baseP.sub + " — Hardware gamer de alta precisión y calidad profesional.",
+    gallery: [baseP.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"],
+  };
   const [selImg,     setSelImg]     = useState(0);
   const [selVariant, setSelVariant] = useState(0);
   const [qty,        setQty]        = useState(1);

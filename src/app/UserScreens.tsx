@@ -904,7 +904,7 @@ export function ChatMobile({ onNav }:{ onNav:(s:string)=>void }) {
    PROFILE & GAMIFICATION — DESKTOP
 ═══════════════════════════════════════ */
 
-export function ProfileDesktop({ onNav, role="guest" }:{ onNav:(s:string)=>void; role?:string }) {
+export function ProfileDesktop({ onNav, role="guest", user }:{ onNav:(s:string)=>void; role?:string; user?:any }) {
   if (role === "guest") {
     return (
       <div style={{ background:bg, minHeight:"calc(100vh - 56px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"60px 24px" }}>
@@ -924,7 +924,7 @@ export function ProfileDesktop({ onNav, role="guest" }:{ onNav:(s:string)=>void;
     );
   }
 
-  const u = USER_PROFILE;
+  const u = user || USER_PROFILE;
   const rank = RANK_CFG[u.level];
   const nextLvl = u.level==="Gold"?"Platinum":"—";
   const nextRank = nextLvl!=="—"?RANK_CFG[nextLvl as XPLevel]:null;
@@ -1046,7 +1046,7 @@ export function ProfileDesktop({ onNav, role="guest" }:{ onNav:(s:string)=>void;
    PROFILE & GAMIFICATION — MOBILE
 ═══════════════════════════════════════ */
 
-export function ProfileMobile({ onNav, role="guest" }:{ onNav:(s:string)=>void; role?:string }) {
+export function ProfileMobile({ onNav, role="guest", user }:{ onNav:(s:string)=>void; role?:string; user?:any }) {
   if (role === "guest") {
     return (
       <div style={{ background:bg, padding:"60px 20px 80px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", minHeight:"60vh" }}>
@@ -1064,7 +1064,7 @@ export function ProfileMobile({ onNav, role="guest" }:{ onNav:(s:string)=>void; 
     );
   }
 
-  const u = USER_PROFILE;
+  const u = user || USER_PROFILE;
   const rank = RANK_CFG[u.level];
   const xpInLevel = u.xp - rank.min;
   const xpTotal   = rank.max - rank.min;
@@ -1240,10 +1240,14 @@ export function AccessibilityDesktop({ onNav }:{ onNav:(s:string)=>void }) {
 
         {/* Save + reset */}
         <div style={{ display:"flex",gap:12,marginTop:28 }}>
-          <NeonBtn variant="primary" style={{ padding:"13px 32px" }} onClick={()=>{}}>
+          <NeonBtn variant="primary" style={{ padding:"13px 32px" }} onClick={() => {
+            applyA11y(cfg);
+            try { localStorage.setItem("gamehub_a11y", JSON.stringify(cfg)); } catch (e) {}
+            toast.success("Preferencias de accesibilidad guardadas y aplicadas con éxito");
+          }}>
             <Check size={15}/>Guardar preferencias
           </NeonBtn>
-          <NeonBtn variant="ghost" onClick={()=>setCfg(A11Y_INIT)}>
+          <NeonBtn variant="ghost" onClick={()=>{ setCfg(A11Y_INIT); applyA11y(A11Y_INIT); }}>
             <RotateCcw size={13}/>Restablecer
           </NeonBtn>
           <button onClick={()=>onNav("profile")} style={{ marginLeft:"auto",background:"none",border:"none",cursor:"pointer",color:txS,fontSize:13,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:5 }}>
@@ -1260,7 +1264,13 @@ export function AccessibilityDesktop({ onNav }:{ onNav:(s:string)=>void }) {
 ═══════════════════════════════════════ */
 
 export function AccessibilityMobile({ onNav }:{ onNav:(s:string)=>void }) {
-  const [cfg, setCfg] = useState<A11YState>(A11Y_INIT);
+  const [cfg, setCfg] = useState<A11YState>(() => {
+    try {
+      const saved = localStorage.getItem("gamehub_a11y");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return A11Y_INIT;
+  });
   const toggle = (k:keyof A11YState) => setCfg(p=>({ ...p,[k]:!p[k] }));
   const setScale = (v:100|125|150) => setCfg(p=>({ ...p,textScale:v }));
 
@@ -1308,8 +1318,12 @@ export function AccessibilityMobile({ onNav }:{ onNav:(s:string)=>void }) {
       </div>
 
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)`,display:"flex",gap:10 }}>
-        <NeonBtn variant="ghost" small onClick={()=>setCfg(A11Y_INIT)} style={{ padding:"12px 14px" }}><RotateCcw size={12}/>Reset</NeonBtn>
-        <NeonBtn variant="primary" full style={{ padding:"13px" }}><Check size={14}/>Guardar preferencias</NeonBtn>
+        <NeonBtn variant="ghost" small onClick={()=>{ setCfg(A11Y_INIT); applyA11y(A11Y_INIT); }} style={{ padding:"12px 14px" }}><RotateCcw size={12}/>Reset</NeonBtn>
+        <NeonBtn variant="primary" full style={{ padding:"13px" }} onClick={() => {
+          applyA11y(cfg);
+          try { localStorage.setItem("gamehub_a11y", JSON.stringify(cfg)); } catch (e) {}
+          toast.success("Preferencias de accesibilidad guardadas y aplicadas con éxito");
+        }}><Check size={14}/>Guardar preferencias</NeonBtn>
       </div>
     </div>
   );

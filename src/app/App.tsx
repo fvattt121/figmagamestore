@@ -278,11 +278,53 @@ export default function App() {
       toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
     }
   };
+  const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
+  const [currentUser, setCurrentUser] = useState<any>({
+    name: "Usuario Gamer",
+    handle: "@gamer_pro",
+    level: "Gold",
+    xp: 2450,
+    totalOrders: 8,
+    totalSpent: 1250,
+    email: "usuario@gamehub.com"
+  });
+
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
-  const login  = (r:"user"|"admin") => { setRole(r); nav(r==="admin"?"admin-dashboard":"home"); };
+  const login = (r:"user"|"admin", email?:string) => {
+    setRole(r);
+    if (r === "admin") {
+      setCurrentUser({
+        name: "Administrador KPI",
+        handle: "@admin_gamehub",
+        level: "Diamond",
+        xp: 9999,
+        totalOrders: 99,
+        totalSpent: 45000,
+        email: email || "admin@gamehub.com"
+      });
+      nav("admin-dashboard");
+    } else {
+      const userEmail = email || "correo@ejemplo.com";
+      const namePart = userEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " ");
+      const formattedName = namePart ? (namePart.charAt(0).toUpperCase() + namePart.slice(1)) : "Usuario Gamer";
+      setCurrentUser({
+        name: formattedName,
+        handle: `@${formattedName.replace(/\s+/g, "_").toLowerCase()}`,
+        level: "Gold",
+        xp: 2450,
+        totalOrders: 5,
+        totalSpent: 890,
+        email: userEmail
+      });
+      nav("home");
+    }
+  };
   const logout = () => { setRole("guest"); setMenuOpen(false); };
 
-  const openDetail = (_p: Product) => { nav("detail"); };
+  const openDetail = (p: Product) => {
+    if (p) setSelectedProduct(p);
+    nav("detail");
+  };
 
   // Fluid responsive container for mobile viewports (each view scrolls vertically to SimpleFooter)
   const MobileWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -708,8 +750,8 @@ export default function App() {
         {screen==="catalog"&&!isMobile&&<CatalogDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} onDetail={openDetail}/>}
         {screen==="catalog"&&isMobile&&(<MobileWrapper><CatalogMobile onNav={nav} onSearch={()=>setSearchOpen(true)} onDetail={openDetail}/>{searchOpen&&<SearchOverlay onClose={()=>setSearchOpen(false)} mobile/>}</MobileWrapper>)}
 
-        {screen==="detail"&&!isMobile&&<ProductDetailDesktop onNav={nav} onSearch={()=>setSearchOpen(true)}/>}
-        {screen==="detail"&&isMobile&&(<MobileWrapper><ProductDetailMobile onBack={()=>nav("catalog")}/></MobileWrapper>)}
+        {screen==="detail"&&!isMobile&&<ProductDetailDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} product={selectedProduct}/>}
+        {screen==="detail"&&isMobile&&(<MobileWrapper><ProductDetailMobile onBack={()=>nav("catalog")} product={selectedProduct}/></MobileWrapper>)}
 
         {screen==="search"&&!isMobile&&(<div style={{minHeight:"calc(100vh - 56px)",background:bg}}><SearchOverlay onClose={()=>nav("home")}/></div>)}
         {screen==="search"&&isMobile&&(<MobileWrapper><SearchOverlay onClose={()=>nav("home")} mobile/></MobileWrapper>)}
@@ -758,8 +800,8 @@ export default function App() {
           </div>
         )}
 
-        {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav} role={role}/>}
-        {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav} role={role}/></MobileWrapper>)}
+        {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav} role={role} user={currentUser}/>}
+        {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav} role={role} user={currentUser}/></MobileWrapper>)}
 
         {screen==="support"&&!isMobile&&<SupportDesktop onNav={nav}/>}
         {screen==="support"&&isMobile&&(<MobileWrapper><SupportMobile onNav={nav}/></MobileWrapper>)}
