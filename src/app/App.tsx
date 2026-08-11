@@ -1356,95 +1356,58 @@ export default function App() {
 
         {screen==="catalog"&&isMobile&&(<MobileWrapper><CatalogMobile onNav={nav} onSearch={()=>setSearchOpen(true)} onDetail={openDetail}/>{searchOpen&&<SearchOverlay onClose={()=>setSearchOpen(false)} mobile/>}</MobileWrapper>)}
 
-<<<<<<< HEAD
         {screen==="detail"&&!isMobile&&<ProductDetailDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} product={selectedProduct}/>}
         {screen==="detail"&&isMobile&&(<MobileWrapper><ProductDetailMobile onBack={()=>nav("catalog")} product={selectedProduct}/></MobileWrapper>)}
-=======
-        {screen==="detail"&&!isMobile&&<ProductDetailDesktop onNav={nav} onSearch={()=>setSearchOpen(true)}/>}
-
-        {screen==="detail"&&isMobile&&(<MobileWrapper><ProductDetailMobile onBack={()=>nav("catalog")}/></MobileWrapper>)}
->>>>>>> cad2645bb8de7f60573f2bb68b34accd1364c130
 
         {screen==="search"&&!isMobile&&(<div style={{minHeight:"calc(100vh - 56px)",background:bg}}><SearchOverlay onClose={()=>nav("home")}/></div>)}
-
         {screen==="search"&&isMobile&&(<MobileWrapper><SearchOverlay onClose={()=>nav("home")} mobile/></MobileWrapper>)}
 
         {screen==="compare"&&!isMobile&&<CompareDesktop onNav={nav} onSearch={()=>setSearchOpen(true)}/>}
-
         {screen==="compare"&&isMobile&&(<MobileWrapper><CompareMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="cart"&&!isMobile&&<CartDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} cartItems={cartItems} setCartItems={setCartItems}/>}
-
         {screen==="cart"&&isMobile&&(<MobileWrapper><CartMobile onNav={nav} cartItems={cartItems} setCartItems={setCartItems}/></MobileWrapper>)}
 
         {screen==="checkout-1"&&!isMobile&&<CheckoutShipDesktop onNav={nav}/>}
-
         {screen==="checkout-1"&&isMobile&&(<MobileWrapper><CheckoutShipMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="checkout-2"&&!isMobile&&<CheckoutPayDesktop onNav={nav} cartItems={cartItems}/>}
-
         {screen==="checkout-2"&&isMobile&&(<MobileWrapper><CheckoutPayMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="checkout-3"&&!isMobile&&<CheckoutReviewDesktop onNav={nav} cartItems={cartItems}/>}
-
         {screen==="checkout-3"&&isMobile&&(<MobileWrapper><CheckoutReviewMobile onNav={nav} cartItems={cartItems}/></MobileWrapper>)}
 
         {screen==="confirmation"&&!isMobile&&<ConfirmDesktop onNav={nav}/>}
-
         {screen==="confirmation"&&isMobile&&(<MobileWrapper><ConfirmMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="admin-dashboard"&&!isMobile&&<AdminDashboardDesktop onNav={nav}/>}
-
         {screen==="admin-dashboard"&&isMobile&&(<MobileWrapper><AdminDashboardMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="admin-catalog"&&!isMobile&&<AdminCatalogDesktop onNav={nav}/>}
-
         {screen==="admin-catalog"&&isMobile&&(<MobileWrapper><AdminCatalogMobile onNav={nav}/></MobileWrapper>)}
 
         {screen==="admin-logistics"&&!isMobile&&<AdminLogisticsDesktop onNav={nav}/>}
-
         {screen==="admin-logistics"&&isMobile&&(<MobileWrapper><AdminLogisticsMobile onNav={nav}/></MobileWrapper>)}
 
         {(screen==="login"||screen==="register")&&!isMobile&&(
-
           <div style={{ position:"relative", minHeight:"calc(100vh - 56px)" }}>
-
             <button onClick={()=>nav("home")} style={{ position:"absolute", top:20, left:24, zIndex:100, padding:"8px 16px", borderRadius:10, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:600, display:"flex", alignItems:"center", gap:6 }}>
-
               ← Volver a la Tienda
-
             </button>
-
             <AuthDesktop onLogin={login}/>
-
           </div>
-
         )}
-
         {(screen==="login"||screen==="register")&&isMobile&&(
-
           <div style={{ position:"relative", height:"100%" }}>
-
             <button onClick={()=>nav("home")} style={{ position:"absolute", top:12, left:16, zIndex:100, padding:"6px 12px", borderRadius:8, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600 }}>
-
               ← Tienda
-
             </button>
-
             <AuthMobile onLogin={login}/>
-
           </div>
-
         )}
 
-<<<<<<< HEAD
         {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav} role={role} user={currentUser}/>}
         {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav} role={role} user={currentUser}/></MobileWrapper>)}
-=======
-        {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav} role={role}/>}
-
-        {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav} role={role}/></MobileWrapper>)}
->>>>>>> cad2645bb8de7f60573f2bb68b34accd1364c130
 
         {screen==="support"&&!isMobile&&<SupportDesktop onNav={nav}/>}
 

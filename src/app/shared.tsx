@@ -2590,14 +2590,6 @@ export function CatalogDesktop({ onNav, onSearch, onDetail }:{ onNav:(s:string)=
 
 }
 
-export function ProductDetailDesktop({ product, onNav, onSearch }:{ product?:Product; onNav:(s:string)=>void; onSearch:()=>void }) {
-
-  const defaultP = PRODUCT_DETAIL;
-
-  const activeProduct = product || defaultP;
-
-  const gallery = [activeProduct.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"];
-
 export function ProductDetailDesktop({ onNav, onSearch, product }:{ onNav:(s:string)=>void; onSearch:()=>void; product?:Product }) {
   const activeProduct = product || PRODUCTS[0];
   const gallery = [activeProduct.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"];
@@ -2814,91 +2806,29 @@ export function ProductDetailDesktop({ onNav, onSearch, product }:{ onNav:(s:str
 
 }
 
-<<<<<<< HEAD
 export function ProductDetailMobile({ onBack, product }:{ onBack:()=>void; product?:Product }) {
-  const baseP = product || PRODUCTS[0];
-  const p = {
-    ...PRODUCT_DETAIL,
-    ...baseP,
-    description: baseP.sub + " — Hardware gamer de alta precisión y calidad profesional.",
-    gallery: [baseP.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"],
-  };
-=======
-export function ProductDetailMobile({ product, onBack }:{ product?:Product; onBack:()=>void }) {
-
-  const defaultP = PRODUCT_DETAIL;
-
-  const activeProduct = product || defaultP;
-
+  const activeProduct = product || PRODUCTS[0];
   const gallery = [activeProduct.imgId, "1604272986062-67ef7145f0ef", "1633499737221-5e3406d4d952", "1547394765-185e1e68f34e"];
-
-  const description = activeProduct.id === 1 ? "Experimenta la realidad virtual más inmersiva con resolución 4K por ojo, campo de visión de 120° y seguimiento ocular nativo a 120Hz. El ProVision VR X2 redefine los límites del gaming con su procesador Snapdragon XR2 Gen 2." : `El nuevo ${activeProduct.name} es la elección definitiva para los gamers más exigentes. Diseñado con tecnología de vanguardia y ergonomía premium para llevar tu setup de juego al siguiente nivel.`;
-
+  const description = activeProduct.id === 1 ? "Experimenta la realidad virtual más inmersiva con resolución 4K por ojo." : `El nuevo ${activeProduct.name} es la elección definitiva para los gamers más exigentes.`;
   const baseSpecs = [
-
     { label: "Garantía", value: "2 años de fábrica" },
-
     { label: "Compatibilidad", value: "PC, PS5, Xbox Series X/S" },
-
-    { label: "Valoraciones", value: `${activeProduct.rating} estrellas de ${activeProduct.reviews} reseñas` }
-
+    { label: "Valoraciones", value: `${activeProduct.rating} estrellas` }
   ];
-
   const specs = activeProduct.cat === "vr" ? [
-
     { label: "Resolución", value: "4K por ojo" },
-
     { label: "Tasa Refresco", value: "120Hz / 90Hz adaptativo" },
-
-    { label: "Campo de Visión", value: "120° diagonal" },
-
     ...baseSpecs
-
-  ] : activeProduct.cat === "keyboard" ? [
-
-    { label: "Tipo Switch", value: "Mecánico Premium" },
-
-    { label: "Layout", value: "Español / ISO" },
-
-    { label: "Conectividad", value: "USB-C desmontable / Inalámbrico" },
-
-    ...baseSpecs
-
-  ] : activeProduct.cat === "controller" ? [
-
-    { label: "Grip", value: "Antideslizante Ergonómico" },
-
-    { label: "Batería", value: "Hasta 20 horas de autonomía" },
-
-    { label: "Botones", value: "Mecánicos táctiles de alta velocidad" },
-
-    ...baseSpecs
-
   ] : [
-
-    { label: "Audio", value: "Sonido envolvente 7.1 espacial" },
-
-    { label: "Drivers", value: "50 mm de neodimio" },
-
-    { label: "Micrófono", value: "Cancelación de ruido activa" },
-
+    { label: "Audio", value: "Sonido envolvente 7.1" },
     ...baseSpecs
-
   ];
-
   const p = {
-
     ...activeProduct,
-
     gallery,
-
     description,
-
     specs
-
   };
-
->>>>>>> cad2645bb8de7f60573f2bb68b34accd1364c130
   const [selImg,     setSelImg]     = useState(0);
 
   const [selVariant, setSelVariant] = useState(0);
