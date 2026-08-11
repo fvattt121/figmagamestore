@@ -1289,22 +1289,9 @@ export function HomeDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onSear
 }
 
 export function HomeMobile({ onNav, onSearch }:{ onNav:(s:string)=>void; onSearch:()=>void }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeCat, setActiveCat] = useState<string|null>(null);
   return (
     <div style={{ background:bg,height:"100%",overflowY:"auto",position:"relative" }} className="thin-scroll">
-      <div style={{ padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,position:"sticky",top:0,zIndex:20 }}>
-        <button onClick={()=>setDrawerOpen(true)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Menu size={22}/></button>
-        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>onNav("cart")}>
-          <GHLogo scale={0.65} />
-        </div>
-        <div style={{ display:"flex",gap:12 }}>
-          <button onClick={onSearch} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Search size={20}/></button>
-          <button onClick={()=>onNav("cart")} style={{ background:"none",border:"none",cursor:"pointer",color:txS,position:"relative" }}>
-            <ShoppingCart size={20}/><span style={{ position:"absolute",top:-4,right:-5,width:16,height:16,borderRadius:"50%",background:mg,color:"#fff",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center" }}>3</span>
-          </button>
-        </div>
-      </div>
       <HeroCarousel mobile onCTA={()=>onNav("catalog")} onAll={()=>onNav("catalog")}/>
       <div style={{ display:"flex",gap:10,padding:"14px 16px",overflowX:"auto" }} className="no-scroll">
         {CATEGORIES.map(c=><CatChip key={c.id} cat={c} active={activeCat===c.id} onClick={()=>{setActiveCat(a=>a===c.id?null:c.id);onNav("catalog");}}/>)}
@@ -1324,55 +1311,6 @@ export function HomeMobile({ onNav, onSearch }:{ onNav:(s:string)=>void; onSearc
           {PRODUCTS.slice(4,8).map(p=><ProductCard key={p.id} p={p} onClick={()=>onNav("detail")}/>)}
         </div>
       </div>
-      {drawerOpen&&(
-        <div className="fade-in" style={{ position:"absolute",inset:0,zIndex:50 }}>
-          <div onClick={()=>setDrawerOpen(false)} style={{ position:"absolute",inset:0,background:"rgba(0,0,0,0.75)" }}/>
-          <div className="slide-r" style={{ position:"absolute",left:0,top:0,bottom:0,width:252,background:bgC,borderRight:`1px solid rgba(139,47,214,0.35)`,padding:20 }}>
-            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24 }}>
-              <GHLogo scale={0.65} />
-              <button onClick={()=>setDrawerOpen(false)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><X size={20}/></button>
-            </div>
-            {[{ id:"home",Icon:Home,label:"Inicio" },{ id:"catalog",Icon:Gamepad2,label:"Catálogo" },{ id:"compare",Icon:BarChart2,label:"Comparador" },{ id:"search",Icon:Search,label:"Buscar" },{ id:"cart",Icon:ShoppingCart,label:"Carrito (3)" },{ id:"profile",Icon:User,label:"Mi Perfil" }].map(({ id, Icon, label })=>(
-              <button key={id} onClick={()=>{id==="search"?onSearch():onNav(id);setDrawerOpen(false);}}
-                style={{ display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 0",background:"none",border:"none",cursor:"pointer",color:txS,borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
-                <Icon size={18}/><span className="ghi" style={{ fontSize:14,fontWeight:500 }}>{label}</span>
-              </button>
-            ))}
-            <button onClick={() => {
-              const list = (window as any).getNotifications ? (window as any).getNotifications() : [];
-              if (list.length === 0) {
-                toast("🔔 No tienes notificaciones nuevas", { description: "Estás al día con todas tus alertas." });
-              } else {
-                list.forEach((n: any, idx: number) => {
-                  setTimeout(() => {
-                    toast(`🔔 ${n.title}`, {
-                      description: `${n.desc} (${n.date})`,
-                      action: n.targetScreen && n.actionLabel ? {
-                        label: n.actionLabel,
-                        onClick: () => {
-                          if ((window as any).navigateToScreen) {
-                            (window as any).navigateToScreen(n.targetScreen);
-                          }
-                        }
-                      } : undefined
-                    });
-                  }, idx * 150);
-                });
-              }
-              setDrawerOpen(false);
-            }}
-              style={{ display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 0",background:"none",border:"none",cursor:"pointer",color:txS,borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
-              <div style={{ position:"relative" }}>
-                <Bell size={18}/>
-                {((window as any).getNotifications ? (window as any).getNotifications().length > 0 : true) && (
-                  <span style={{ position:"absolute",top:-1,right:-1,width:6,height:6,borderRadius:"50%",background:mg }}/>
-                )}
-              </div>
-              <span className="ghi" style={{ fontSize:14,fontWeight:500 }}>Notificaciones</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

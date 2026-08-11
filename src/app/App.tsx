@@ -192,6 +192,38 @@ export default function App() {
     };
   }, []);
 
+  const pushedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const hasOpenOverlay = menuOpen || notifOpen || searchOpen || !!modalType;
+    
+    if (hasOpenOverlay && !pushedRef.current) {
+      window.history.pushState({ overlayOpen: true }, "");
+      pushedRef.current = true;
+    } else if (!hasOpenOverlay && pushedRef.current) {
+      pushedRef.current = false;
+      if (window.history.state?.overlayOpen) {
+        window.history.back();
+      }
+    }
+    
+    const handlePopState = (e: PopStateEvent) => {
+      if (pushedRef.current) {
+        pushedRef.current = false;
+        setMenuOpen(false);
+        setNotifOpen(false);
+        setSearchOpen(false);
+        setModalType(null);
+      }
+    };
+    
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [menuOpen, notifOpen, searchOpen, modalType, isMobile]);
+
   const nav = (s:string) => {
     setSearchOpen(false);
     setScreen(s as Screen);
@@ -211,6 +243,7 @@ export default function App() {
       toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
     }
   };
+  const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
   const login  = (r:"user"|"admin") => { setRole(r); setScreen(r==="admin"?"admin-dashboard":"home"); };
   const logout = () => { setRole("guest"); setMenuOpen(false); };
 
@@ -537,9 +570,41 @@ export default function App() {
            <div style={{ cursor: "pointer" }} onClick={() => nav(role === "admin" ? "admin-dashboard" : "home")}>
              <GHLogo scale={0.65} />
            </div>
-           <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{ background: "none", border: "none", cursor: "pointer", color: tx, position: "relative", padding: 4 }}>
-             <Bell size={24} />
-           </button>
+           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+             <button onClick={() => setSearchOpen(true)} title="Buscar" style={{ background: "none", border: "none", cursor: "pointer", color: tx, padding: 4, display: "flex", alignItems: "center" }}>
+               <Search size={22} />
+             </button>
+             <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{ background: "none", border: "none", cursor: "pointer", color: tx, position: "relative", padding: 4, display: "flex", alignItems: "center" }}>
+               <Bell size={22} />
+               {notifications.length > 0 && (
+                 <span style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, borderRadius: "50%", background: mg, boxShadow: `0 0 6px ${mg}` }} />
+               )}
+             </button>
+             <button onClick={() => nav("cart")} title="Carrito" style={{ background: "none", border: "none", cursor: "pointer", color: tx, position: "relative", padding: 4, display: "flex", alignItems: "center" }}>
+               <ShoppingCart size={22} />
+               {cartCount > 0 && (
+                 <span style={{
+                   position: "absolute",
+                   top: -2,
+                   right: -4,
+                   background: mg,
+                   color: "#fff",
+                   fontSize: 9,
+                   fontWeight: 700,
+                   borderRadius: "50%",
+                   minWidth: 16,
+                   height: 16,
+                   display: "flex",
+                   alignItems: "center",
+                   justifyContent: "center",
+                   padding: "0 4px",
+                   boxShadow: GM
+                 }}>
+                   {cartCount}
+                 </span>
+               )}
+             </button>
+           </div>
         </div>
       )}
 
