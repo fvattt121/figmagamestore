@@ -311,11 +311,7 @@ export const CMP_SPECS: { label:string; vals:string[]; best:number[] }[] = [
 export type StockState = "ok" | "low" | "out";
 export type CartItemType = Product & { qty:number; variant:string; stock:StockState; stockCount:number };
 
-export const CART_INIT: CartItemType[] = [
-  { ...PRODUCTS[0], qty:1, variant:"Negro Obsidiana", stock:"ok",  stockCount:14 },
-  { ...PRODUCTS[1], qty:2, variant:"Switch Rojo",     stock:"low", stockCount:2  },
-  { ...PRODUCTS[3], qty:1, variant:"Negro",           stock:"ok",  stockCount:9  },
-];
+export const CART_INIT: CartItemType[] = [];
 
 /* ── NEW: Tracking ── */
 export const TRACKING = [
@@ -330,8 +326,8 @@ export const maskCard   = (v:string) => v.replace(/\D/g,"").slice(0,16).replace(
 export const maskExpiry = (v:string) => { const d=v.replace(/\D/g,"").slice(0,4); return d.length>2?d.slice(0,2)+"/"+d.slice(2):d; };
 export const calcTotals = (items:CartItemType[]) => {
   const sub = items.reduce((s,i)=>s+i.price*i.qty,0);
-  const ship = sub>300?0:9.99;
-  const tax  = sub*0.16;
+  const ship = items.length===0 ? 0 : sub>300 ? 0 : 9.99;
+  const tax  = items.length===0 ? 0 : sub*0.16;
   return { sub, ship, tax, total:sub+ship+tax };
 };
 
@@ -1576,7 +1572,7 @@ export function ProductDetailMobile({ onBack }:{ onBack:()=>void }) {
 
 /* ── COMPARADOR DESKTOP ── */
 export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onSearch:()=>void }) {
-  const [cmpProds, setCmpProds] = useState<Product[]>(CMP_PRODS.slice(0,3));
+  const [cmpProds, setCmpProds] = useState<Product[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [catFilter,   setCatFilter]   = useState<string[]>([]);
   const [brandFilter, setBrandFilter] = useState<string[]>([]);
@@ -1910,7 +1906,7 @@ export function CatalogMobile({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>
 }
 
 export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
-  const [cmpProds, setCmpProds] = useState<Product[]>(()=>[PRODUCTS[0], PRODUCTS[2], PRODUCTS[3]]);
+  const [cmpProds, setCmpProds] = useState<Product[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const removeProduct = (id:number) => setCmpProds(arr=>arr.filter(p=>p.id!==id));

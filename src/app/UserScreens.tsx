@@ -904,7 +904,26 @@ export function ChatMobile({ onNav }:{ onNav:(s:string)=>void }) {
    PROFILE & GAMIFICATION — DESKTOP
 ═══════════════════════════════════════ */
 
-export function ProfileDesktop({ onNav }:{ onNav:(s:string)=>void }) {
+export function ProfileDesktop({ onNav, role="guest" }:{ onNav:(s:string)=>void; role?:string }) {
+  if (role === "guest") {
+    return (
+      <div style={{ background:bg, minHeight:"calc(100vh - 56px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"60px 24px" }}>
+        <div style={{ background:bgC, borderRadius:20, padding:40, maxWidth:460, width:"100%", textAlign:"center", border:`1px solid rgba(139,47,214,0.25)`, boxShadow:GV }}>
+          <div style={{ width:72, height:72, borderRadius:"50%", background:`rgba(139,47,214,0.15)`, border:`1px solid ${vi}44`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
+            <User size={32} color={txS}/>
+          </div>
+          <h2 className="ghr" style={{ fontSize:26, fontWeight:700, color:tx, marginBottom:8 }}>MODO INVITADO</h2>
+          <p className="ghi" style={{ fontSize:14, color:txS, marginBottom:24, lineHeight:1.6 }}>
+            No has iniciado sesión. Crea una cuenta gamer o accede para acumular puntos XP, rastrear tus envíos y guardar tus preferencias.
+          </p>
+          <NeonBtn variant="primary" full onClick={() => onNav("login")} style={{ padding:"14px", justifyContent:"center", fontSize:15 }}>
+            <LogIn size={18}/> INICIAR SESIÓN / REGISTRARSE
+          </NeonBtn>
+        </div>
+      </div>
+    );
+  }
+
   const u = USER_PROFILE;
   const rank = RANK_CFG[u.level];
   const nextLvl = u.level==="Gold"?"Platinum":"—";
@@ -1027,7 +1046,24 @@ export function ProfileDesktop({ onNav }:{ onNav:(s:string)=>void }) {
    PROFILE & GAMIFICATION — MOBILE
 ═══════════════════════════════════════ */
 
-export function ProfileMobile({ onNav }:{ onNav:(s:string)=>void }) {
+export function ProfileMobile({ onNav, role="guest" }:{ onNav:(s:string)=>void; role?:string }) {
+  if (role === "guest") {
+    return (
+      <div style={{ background:bg, padding:"60px 20px 80px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", minHeight:"60vh" }}>
+        <div style={{ width:64, height:64, borderRadius:"50%", background:`rgba(139,47,214,0.15)`, border:`1px solid ${vi}44`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:16 }}>
+          <User size={28} color={txS}/>
+        </div>
+        <h2 className="ghr" style={{ fontSize:22, fontWeight:700, color:tx, marginBottom:8 }}>MODO INVITADO</h2>
+        <p className="ghi" style={{ fontSize:13, color:txS, marginBottom:24, lineHeight:1.5, maxWidth:320 }}>
+          Inicia sesión o crea tu cuenta para guardar tu historial de compras y recompensas gamer.
+        </p>
+        <NeonBtn variant="primary" full onClick={() => onNav("login")} style={{ padding:"14px", justifyContent:"center", fontSize:15 }}>
+          <LogIn size={18}/> INICIAR SESIÓN
+        </NeonBtn>
+      </div>
+    );
+  }
+
   const u = USER_PROFILE;
   const rank = RANK_CFG[u.level];
   const xpInLevel = u.xp - rank.min;
@@ -1128,10 +1164,33 @@ export function ProfileMobile({ onNav }:{ onNav:(s:string)=>void }) {
    ACCESSIBILITY SETTINGS — DESKTOP
 ═══════════════════════════════════════ */
 
+export function applyA11y(cfg: A11YState) {
+  const root = document.documentElement;
+  if (cfg.highContrast) {
+    root.style.filter = "contrast(145%) brightness(115%)";
+  } else if (cfg.colorblind) {
+    root.style.filter = "saturate(150%) hue-rotate(20deg)";
+  } else {
+    root.style.filter = "none";
+  }
+
+  root.style.fontSize = cfg.textScale === 150 ? "18px" : cfg.textScale === 125 ? "17px" : "16px";
+
+  if (cfg.reduceMotion) {
+    root.setAttribute("data-reduce-motion", "true");
+  } else {
+    root.removeAttribute("data-reduce-motion");
+  }
+}
+
 export function AccessibilityDesktop({ onNav }:{ onNav:(s:string)=>void }) {
   const [cfg, setCfg] = useState<A11YState>(A11Y_INIT);
   const toggle = (k:keyof A11YState) => setCfg(p=>({ ...p,[k]:!p[k] }));
   const setScale = (v:100|125|150) => setCfg(p=>({ ...p,textScale:v }));
+
+  useEffect(() => {
+    applyA11y(cfg);
+  }, [cfg]);
 
   return (
     <div style={{ background:bg,minHeight:"calc(100vh - 56px)",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"44px 24px" }}>
@@ -1204,6 +1263,10 @@ export function AccessibilityMobile({ onNav }:{ onNav:(s:string)=>void }) {
   const [cfg, setCfg] = useState<A11YState>(A11Y_INIT);
   const toggle = (k:keyof A11YState) => setCfg(p=>({ ...p,[k]:!p[k] }));
   const setScale = (v:100|125|150) => setCfg(p=>({ ...p,textScale:v }));
+
+  useEffect(() => {
+    applyA11y(cfg);
+  }, [cfg]);
 
   return (
     <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column" }}>

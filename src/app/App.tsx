@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye } from "lucide-react";
+import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye, Search, ShoppingCart, User } from "lucide-react";
 import {
   GH_CSS, bg, bgC, bgE, mg, vi, cy, ok, tx, txS, GM, GC,
   CartItemType, CART_INIT,
@@ -83,7 +83,7 @@ function PhoneFrame({ children, activeNav="home", onNav, screen, hideBottomNav=f
   );
 }
 
-type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility"|"lsm";
+type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility"|"lsm"|"login"|"register";
 
 const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
   { id:"home",             label:"Home",          group:0 },
@@ -381,23 +381,7 @@ export default function App() {
     );
   };
 
-  /* ── Auth gate: guest → fullscreen auth, no nav ── */
-  if (role === "guest") {
-    return (
-      <div style={{ background:bg,minHeight:"100vh" }}>
-        <style>{GH_CSS}</style>
-        <Toaster theme="dark" position="bottom-right" toastOptions={{ style:{ background:"#150A24",border:"1px solid rgba(255,46,158,0.35)",color:"#F0E6FF" } }}/>
-        {!isMobile ? (
-          <AuthDesktop onLogin={login}/>
-        ) : (
-          <AuthMobile onLogin={login}/>
-        )}
-        {renderLegalModal()}
-      </div>
-    );
-  }
-
-  const HIDDEN_NAV_SCREENS = ["checkout-1", "checkout-2", "checkout-3", "confirmation", "detail", "search", "lsm"];
+  const HIDDEN_NAV_SCREENS = ["checkout-1", "checkout-2", "checkout-3", "confirmation", "detail", "search", "lsm", "login", "register"];
   const visibleTabs = SCREEN_TABS.filter(t => !HIDDEN_NAV_SCREENS.includes(t.id));
 
   const groups = [
@@ -414,74 +398,127 @@ export default function App() {
 
       {/* ─── Top navigation (desktop only) ─── */}
       {!isMobile && (
-      <div style={{ position:"sticky",top:0,zIndex:200,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",borderBottom:`1px solid rgba(139,47,214,0.25)`,height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+      <div style={{ position:"sticky",top:0,zIndex:500,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",borderBottom:`1px solid rgba(139,47,214,0.25)`,height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px" }}>
+        {/* Left: Brand Logo */}
+        <div style={{ display:"flex",alignItems:"center",gap:20 }}>
           <div style={{ cursor:"pointer" }} onClick={()=>nav(role==="admin"?"admin-dashboard":"home")}>
             <GHLogo scale={0.65} />
           </div>
         </div>
 
-        {/* Grouped dropdowns for Desktop */}
-        {!isMobile && (
-          <div style={{ display:"flex", alignItems:"center", gap:20 }}>
-            {groups.map(g => {
-              if (g.adminOnly && role !== "admin") return null;
-              const gItems = visibleTabs.filter(t => t.group === g.group);
-              const isActive = gItems.some(t => t.id === screen);
-              return (
-                <div key={g.name}
-                  onMouseEnter={() => setOpenDropdown(g.name)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                  style={{ position:"relative", padding:"12px 0" }}>
-                  <button style={{
-                    display:"flex", alignItems:"center", gap:4, background:"transparent", border:"none",
-                    color: isActive ? g.color : txS, fontSize:12, fontWeight:700, cursor:"pointer",
-                    fontFamily:"'Inter',sans-serif", letterSpacing:"0.06em", transition:"all 0.2s"
+        {/* Center: Grouped Dropdowns */}
+        <div style={{ display:"flex", alignItems:"center", gap:24 }}>
+          {groups.map(g => {
+            if (g.adminOnly && role !== "admin") return null;
+            const gItems = visibleTabs.filter(t => t.group === g.group);
+            const isActive = gItems.some(t => t.id === screen);
+            return (
+              <div key={g.name}
+                onMouseEnter={() => setOpenDropdown(g.name)}
+                onMouseLeave={() => setOpenDropdown(null)}
+                style={{ position:"relative", padding:"12px 0" }}>
+                <button style={{
+                  display:"flex", alignItems:"center", gap:5, background:"transparent", border:"none",
+                  color: isActive ? g.color : txS, fontSize:13, fontWeight:700, cursor:"pointer",
+                  fontFamily:"'Inter',sans-serif", letterSpacing:"0.05em", transition:"all 0.2s"
+                }}>
+                  {g.name.toUpperCase()} <ChevronDown size={13}/>
+                </button>
+                {openDropdown === g.name && (
+                  <div style={{
+                    position:"absolute", top:"100%", left:0, background:bgC, borderRadius:12,
+                    border:`1px solid rgba(139,47,214,0.3)`, padding:"6px", minWidth:170,
+                    display:"flex", flexDirection:"column", gap:3, boxShadow:`0 10px 30px rgba(0,0,0,0.6)`,
+                    zIndex:600
                   }}>
-                    {g.name.toUpperCase()} <ChevronDown size={12}/>
-                  </button>
-                  {openDropdown === g.name && (
-                    <div style={{
-                      position:"absolute", top:"100%", left:0, background:bgC, borderRadius:12,
-                      border:`1px solid rgba(139,47,214,0.3)`, padding:"6px", minWidth:160,
-                      display:"flex", flexDirection:"column", gap:2, boxShadow:`0 10px 30px rgba(0,0,0,0.6)`,
-                      zIndex:300
-                    }}>
-                      {gItems.map(t => (
-                        <button key={t.id} onClick={() => nav(t.id)} style={{
-                          padding:"8px 12px", borderRadius:6, fontSize:12, fontWeight:600,
-                          textAlign:"left", cursor:"pointer", border:"none", width:"100%",
-                          background: screen === t.id ? "rgba(255,46,158,0.12)" : "transparent",
-                          color: screen === t.id ? mg : tx, transition: "all 0.15s",
-                          fontFamily:"'Inter',sans-serif"
-                        }}
-                        onMouseEnter={e => {
-                          if (screen !== t.id) e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                        }}
-                        onMouseLeave={e => {
-                          if (screen !== t.id) e.currentTarget.style.background = "transparent";
-                        }}>
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    {gItems.map(t => (
+                      <button key={t.id} onClick={() => nav(t.id)} style={{
+                        padding:"8px 12px", borderRadius:6, fontSize:12, fontWeight:600,
+                        textAlign:"left", cursor:"pointer", border:"none", width:"100%",
+                        background: screen === t.id ? "rgba(255,46,158,0.12)" : "transparent",
+                        color: screen === t.id ? mg : tx, transition: "all 0.15s",
+                        fontFamily:"'Inter',sans-serif"
+                      }}>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-        <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0 }}>
-           {/* Notification Bell (desktop) */}
-           <button onClick={() => setNotifOpen(true)} style={{ background:"none",border:"none",cursor:"pointer",color:tx,marginRight:12,display:"flex",alignItems:"center" }}><Bell size={24}/></button>
-           {/* Logout */}
-           <button onClick={logout} style={{ padding:"5px 10px",borderRadius:7,background:"transparent",border:`1px solid rgba(139,47,214,0.3)`,color:txS,fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4,transition:"all 0.15s" }}
-             onMouseEnter={e=>(e.currentTarget.style.borderColor=mg+"55")} onMouseLeave={e=>(e.currentTarget.style.borderColor="rgba(139,47,214,0.3)")}
-           >
-             <LogIn size={11} style={{ transform:"scaleX(-1)" }}/>
-Salir
+        {/* Right: Actions cleanly spaced */}
+        <div style={{ display:"flex",alignItems:"center",gap:14,flexShrink:0 }}>
+           {/* Search button */}
+           <button onClick={() => setSearchOpen(true)} title="Buscar productos" style={{
+             display:"flex", alignItems:"center", gap:6, padding:"6px 12px", borderRadius:8,
+             background:bgE, border:`1px solid rgba(139,47,214,0.25)`, color:txS, fontSize:12,
+             fontWeight:600, cursor:"pointer", fontFamily:"'Inter',sans-serif"
+           }}>
+             <Search size={14} color={cy}/> Buscar...
            </button>
+
+           {/* Cart button with live item count badge */}
+           <button onClick={() => nav("cart")} title="Ver Carrito" style={{
+             position:"relative", display:"flex", alignItems:"center", gap:6, padding:"6px 14px",
+             borderRadius:8, background:cartItems.length>0?`rgba(255,46,158,0.12)`:bgE,
+             border:`1px solid ${cartItems.length>0?mg+"55":"rgba(139,47,214,0.25)"}`,
+             color:cartItems.length>0?mg:tx, fontSize:12, fontWeight:700, cursor:"pointer",
+             fontFamily:"'Inter',sans-serif", boxShadow:cartItems.length>0?GM:"none"
+           }}>
+             <ShoppingCart size={15} color={cartItems.length>0?mg:tx}/>
+             <span>Carrito ({cartItems.length})</span>
+           </button>
+
+           {/* Accessibility button */}
+           <button onClick={() => nav("accessibility")} title="Accesibilidad" style={{
+             padding:6, borderRadius:8, background:screen==="accessibility"?`rgba(0,240,255,0.15)`:"transparent",
+             border:`1px solid ${screen==="accessibility"?cy:"rgba(139,47,214,0.25)"}`, color:cy, cursor:"pointer",
+             display:"flex", alignItems:"center", justifyContent:"center"
+           }}>
+             <Eye size={18}/>
+           </button>
+
+           {/* Notification Bell */}
+           <button onClick={() => setNotifOpen(true)} title="Notificaciones" style={{
+             position:"relative", background:"none", border:"none", cursor:"pointer", color:tx, padding:6,
+             display:"flex", alignItems:"center"
+           }}>
+             <Bell size={20}/>
+             {notifications.length > 0 && (
+               <span style={{ position:"absolute", top:3, right:3, width:8, height:8, borderRadius:"50%", background:mg, boxShadow:`0 0 6px ${mg}` }}/>
+             )}
+           </button>
+
+           {/* Profile & Login/Logout button */}
+           {role === "guest" ? (
+             <button onClick={() => nav("login")} style={{
+               padding:"7px 16px", borderRadius:8, background:`linear-gradient(135deg,${mg},${vi})`,
+               border:"none", color:"#fff", fontSize:12, fontWeight:700, cursor:"pointer",
+               fontFamily:"'Rajdhani',sans-serif", letterSpacing:"0.04em", boxShadow:GM, display:"flex", alignItems:"center", gap:6
+             }}>
+               <LogIn size={13}/> INICIAR SESIÓN
+             </button>
+           ) : (
+             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+               <button onClick={() => nav("profile")} title="Mi Perfil" style={{
+                 display:"flex", alignItems:"center", gap:6, padding:"5px 10px", borderRadius:8,
+                 background:bgE, border:`1px solid rgba(139,47,214,0.3)`, color:tx, fontSize:12,
+                 fontWeight:600, cursor:"pointer", fontFamily:"'Inter',sans-serif"
+               }}>
+                 <User size={14} color={cy}/> Perfil ({role})
+               </button>
+               <button onClick={logout} title="Cerrar sesión" style={{
+                 padding:"5px 10px", borderRadius:8, background:"transparent",
+                 border:`1px solid rgba(139,47,214,0.3)`, color:txS, fontSize:11, fontWeight:600,
+                 cursor:"pointer", fontFamily:"'Inter',sans-serif", display:"flex", alignItems:"center", gap:4
+               }}>
+                 <LogIn size={11} style={{ transform:"scaleX(-1)" }}/> Salir
+               </button>
+             </div>
+           )}
         </div>
       </div>
       )}
@@ -602,8 +639,25 @@ Salir
         {screen==="admin-logistics"&&!isMobile&&<AdminLogisticsDesktop onNav={nav}/>}
         {screen==="admin-logistics"&&isMobile&&(<MobileWrapper><AdminLogisticsMobile onNav={nav}/></MobileWrapper>)}
 
-        {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav}/>}
-        {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav}/></MobileWrapper>)}
+        {(screen==="login"||screen==="register")&&!isMobile&&(
+          <div style={{ position:"relative", minHeight:"calc(100vh - 56px)" }}>
+            <button onClick={()=>nav("home")} style={{ position:"absolute", top:20, left:24, zIndex:100, padding:"8px 16px", borderRadius:10, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:600, display:"flex", alignItems:"center", gap:6 }}>
+              ← Volver a la Tienda
+            </button>
+            <AuthDesktop onLogin={login}/>
+          </div>
+        )}
+        {(screen==="login"||screen==="register")&&isMobile&&(
+          <div style={{ position:"relative", height:"100%" }}>
+            <button onClick={()=>nav("home")} style={{ position:"absolute", top:12, left:16, zIndex:100, padding:"6px 12px", borderRadius:8, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600 }}>
+              ← Tienda
+            </button>
+            <AuthMobile onLogin={login}/>
+          </div>
+        )}
+
+        {screen==="profile"&&!isMobile&&<ProfileDesktop onNav={nav} role={role}/>}
+        {screen==="profile"&&isMobile&&(<MobileWrapper><ProfileMobile onNav={nav} role={role}/></MobileWrapper>)}
 
         {screen==="support"&&!isMobile&&<SupportDesktop onNav={nav}/>}
         {screen==="support"&&isMobile&&(<MobileWrapper><SupportMobile onNav={nav}/></MobileWrapper>)}
