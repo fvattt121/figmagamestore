@@ -130,7 +130,7 @@ function PhoneFrame({ children, activeNav="home", onNav, screen, hideBottomNav=f
 
 }
 
-type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility"|"lsm"|"login"|"register";
+type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility"|"lsm"|"login"|"register"|"orders";
 
 const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
 
@@ -153,6 +153,8 @@ const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
   { id:"checkout-3",       label:"Revisión",      group:1 },
 
   { id:"confirmation",     label:"Confirmación",  group:1 },
+
+  { id:"orders",           label:"Historial",     group:1 },
 
   { id:"admin-dashboard",  label:"Admin KPI",     group:2 },
 
@@ -439,6 +441,9 @@ export default function App() {
   const [returnScreen, setReturnScreen] = useState<string | null>(null);
 
   const nav = (s:string) => {
+    if (s === "orders") {
+      s = "profile";
+    }
     setSearchOpen(false);
 
     if (s === "login" || s === "register") {
@@ -1155,7 +1160,7 @@ export default function App() {
 
                }}>
 
-                 <User size={14} color={cy}/> Perfil ({role})
+                 <User size={14} color={cy}/> Perfil
 
                </button>
 
