@@ -1,69 +1,34 @@
 import { useState, useEffect, useRef } from "react";
-
-import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye, Search, ShoppingCart, User, Bell } from "lucide-react";
-
+import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, ChevronLeft, Eye, Search, ShoppingCart, User, Bell } from "lucide-react";
 import {
-
   GH_CSS, bg, bgC, bgE, mg, vi, cy, ok, tx, txS, GM, GC,
-
   CartItemType, CART_INIT,
-
   BottomNav, SearchOverlay,
-
   HomeDesktop, HomeMobile,
-
   CatalogDesktop, CatalogMobile,
-
   ProductDetailDesktop, ProductDetailMobile,
-
   CompareDesktop, CompareMobile,
-
   CartDesktop, CartMobile,
-
   CheckoutShipDesktop, CheckoutShipMobile,
-
   CheckoutPayDesktop, CheckoutPayMobile,
-
   CheckoutReviewDesktop, CheckoutReviewMobile,
-
   ConfirmDesktop, ConfirmMobile,
-
   Product, GHLogo, NeonBtn, SimpleFooter, PRODUCTS,
-
 } from "./shared";
-
 import {
-
   AdminDashboardDesktop, AdminDashboardMobile,
-
   AdminCatalogDesktop, AdminCatalogMobile,
-
   AdminLogisticsDesktop, AdminLogisticsMobile,
-
 } from "./AdminScreens";
-
 import {
-
   SupportDesktop, SupportMobile,
-
   ChatDesktop, ChatMobile,
-
   ProfileDesktop, ProfileMobile,
-
   AccessibilityDesktop, AccessibilityMobile,
-
   LsmDesktop, LsmMobile,
-
 } from "./UserScreens";
-
 import { AuthDesktop, AuthMobile, AuthRole } from "./AuthScreens";
-
 import { Toaster, toast } from "sonner";
-import { ChevronLeft } from "lucide-react";
-
-import { ChevronLeft } from "lucide-react";
-
-import { ChevronLeft } from "lucide-react";
 
 const CHECKOUT_SCREENS = ["checkout-1","checkout-2","checkout-3"];
 
