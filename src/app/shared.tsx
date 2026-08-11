@@ -2310,7 +2310,7 @@ export function HomeDesktop({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>vo
 
       <Sidebar activeNav="home" onNav={onNav} onSearch={onSearch}/>
 
-      <div style={{ marginLeft:64, flex:1, overflow:"hidden" }}>
+      <div style={{ marginLeft:80, flex:1, overflow:"hidden" }}>
 
         <div style={{ padding:"14px 24px",display:"flex",alignItems:"center",gap:14,borderBottom:`1px solid rgba(139,47,214,0.18)`,background:bgC,position:"sticky",top:0,zIndex:10 }}>
 
@@ -2536,7 +2536,7 @@ export function CatalogDesktop({ onNav, onSearch, onDetail }:{ onNav:(s:string)=
 
       <Sidebar activeNav="catalog" onNav={onNav} onSearch={onSearch}/>
 
-      <div style={{ marginLeft:64,flex:1,display:"flex",overflow:"hidden" }}>
+      <div style={{ marginLeft:80,flex:1,display:"flex",overflow:"hidden" }}>
 
         <div style={{ width:232,flexShrink:0,height:"calc(100vh - 56px)",overflowY:"auto",borderRight:`1px solid rgba(139,47,214,0.2)` }}>
 
@@ -2642,7 +2642,7 @@ export function ProductDetailDesktop({ onNav, onSearch, product }:{ onNav:(s:str
 
       <Sidebar activeNav="catalog" onNav={onNav} onSearch={onSearch}/>
 
-      <div style={{ marginLeft:64,flex:1,padding:"32px",overflowY:"auto",maxHeight:"calc(100vh - 56px)" }} className="thin-scroll">
+      <div style={{ marginLeft:80,flex:1,padding:"32px",overflowY:"auto",maxHeight:"calc(100vh - 56px)" }} className="thin-scroll">
 
         <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:24 }}>
 
@@ -2987,7 +2987,7 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 
       <Sidebar activeNav="compare" onNav={onNav} onSearch={onSearch}/>
 
-      <div style={{ marginLeft:64,flex:1,display:"flex",flexDirection:"column",overflow:"hidden" }}>
+      <div style={{ marginLeft:80,flex:1,display:"flex",flexDirection:"column",overflow:"hidden" }}>
 
         {/* ── Top bar ── */}
 
@@ -3001,33 +3001,25 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 
           <div style={{ flex:1 }}/>
 
-          <button onClick={()=>setFiltersOpen(o=>!o)} style={{
-
-            display:"flex",alignItems:"center",gap:8,padding:"8px 18px",borderRadius:10,
-
-            background:filtersOpen?"rgba(255,46,158,0.12)":bgC,
-
-            border:`1px solid ${filtersOpen?mg+"66":"rgba(139,47,214,0.3)"}`,
-
-            cursor:"pointer",color:filtersOpen?mg:txS,
-
-            fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:600,transition:"all 0.2s",
-
-          }}>
-
-            <SlidersHorizontal size={14}/>
-
-            Filtros
-
-            {totalFilters>0&&<span style={{ background:mg,color:"#fff",borderRadius:"50%",width:18,height:18,fontSize:10,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>{totalFilters}</span>}
-
-          </button>
+          {cmpProds.length > 0 && (
+            <button onClick={()=>setFiltersOpen(o=>!o)} style={{
+              display:"flex",alignItems:"center",gap:8,padding:"8px 18px",borderRadius:10,
+              background:filtersOpen?"rgba(255,46,158,0.12)":bgC,
+              border:`1px solid ${filtersOpen?mg+"66":"rgba(139,47,214,0.3)"}`,
+              cursor:"pointer",color:filtersOpen?mg:txS,
+              fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:600,transition:"all 0.2s",
+            }}>
+              <SlidersHorizontal size={14}/>
+              Filtros
+              {totalFilters>0&&<span style={{ background:mg,color:"#fff",borderRadius:"50%",width:18,height:18,fontSize:10,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>{totalFilters}</span>}
+            </button>
+          )}
 
         </div>
 
         {/* ── Collapsible filter panel ── */}
 
-        {filtersOpen&&(
+        {filtersOpen&&cmpProds.length>0&&(
 
           <div style={{ margin:"14px 32px 0",background:bgC,borderRadius:14,border:`1px solid rgba(139,47,214,0.22)`,padding:"18px 22px",display:"flex",gap:32,flexWrap:"wrap",alignItems:"flex-end",flexShrink:0 }}>
 
@@ -3089,140 +3081,77 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 
         <div style={{ flex:1,padding:"20px 32px 40px",overflowY:"auto" }} className="thin-scroll">
 
-          {/* Product header row */}
-
-          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:0 }}>
-
-            <div style={{ padding:"20px 18px",background:bgC,borderRadius:"12px 0 0 0",border:`1px solid rgba(139,47,214,0.2)`,borderRight:"none",borderBottom:"none",display:"flex",alignItems:"center" }}>
-
-              <span className="ghi" style={{ fontSize:10,color:txS,letterSpacing:"0.07em" }}>COMPARANDO</span>
-
-            </div>
-
-            {cmpProds.map((p,pi)=>(
-
-              <div key={p.id} style={{
-
-                padding:"20px 18px",background:bgC,
-
-                borderRadius:pi===cmpProds.length-1&&cmpProds.length===3?"0 12px 0 0":"none",
-
-                border:`1px solid rgba(139,47,214,0.2)`,borderLeft:"none",borderBottom:"none",
-
-                display:"flex",flexDirection:"column",gap:10,
-
-              }}>
-
-                <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8 }}>
-
-                  <div style={{ width:96,height:96,borderRadius:12,overflow:"hidden",background:bgE,flexShrink:0,border:`1px solid rgba(139,47,214,0.25)` }}>
-
-                    <img src={imgUrl(p.imgId,192,192)} alt={p.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
-
-                  </div>
-
-                  <button onClick={()=>removeProduct(p.id)} title="Quitar" style={{
-
-                    background:"rgba(255,69,0,0.1)",border:`1px solid rgba(255,69,0,0.35)`,borderRadius:8,
-
-                    cursor:"pointer",color:"#FF4500",width:28,height:28,
-
-                    display:"flex",alignItems:"center",justifyContent:"center",
-
-                    transition:"all 0.2s",flexShrink:0,
-
-                  }}><X size={13}/></button>
-
+          {cmpProds.length > 0 && (
+            <>
+              {/* Product header row */}
+              <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:0 }}>
+                <div style={{ padding:"20px 18px",background:bgC,borderRadius:"12px 0 0 0",border:`1px solid rgba(139,47,214,0.2)`,borderRight:"none",borderBottom:"none",display:"flex",alignItems:"center" }}>
+                  <span className="ghi" style={{ fontSize:10,color:txS,letterSpacing:"0.07em" }}>COMPARANDO</span>
                 </div>
-
-                <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>{p.badges.slice(0,2).map(b=><Badge key={b} label={b}/>)}</div>
-
-                <p className="ghr" style={{ fontSize:15,fontWeight:700,color:tx,lineHeight:1.25 }}>{p.name}</p>
-
-                <PriceTag price={p.price} orig={p.orig}/>
-
-                <NeonBtn variant="ghost" small onClick={() => {
-
-                  if ((window as any).addToCart) (window as any).addToCart(p);
-
-                }} style={{ marginTop: 4, fontSize: 11 }}><ShoppingCart size={12}/> + Carrito</NeonBtn>
-
-              </div>
-
-            ))}
-
-            {/* Empty add-product slot */}
-
-            {cmpProds.length<3&&(
-
-              <div style={{
-
-                padding:"20px 18px",background:bgC,borderRadius:"0 12px 0 0",
-
-                border:`1px solid rgba(139,47,214,0.2)`,borderLeft:"none",borderBottom:"none",
-
-                display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:190,
-
-              }}>
-
-                <div style={{ width:52,height:52,borderRadius:"50%",background:"rgba(139,47,214,0.1)",border:`2px dashed rgba(139,47,214,0.35)`,display:"flex",alignItems:"center",justifyContent:"center" }}>
-
-                  <Plus size={20} color={vi} strokeWidth={1.5}/>
-
-                </div>
-
-                <p className="ghi" style={{ fontSize:12,color:txS,textAlign:"center" }}>Agregar producto</p>
-
-                <NeonBtn variant="ghost" onClick={()=>setPickerOpen(o=>!o)}><Plus size={12}/>Añadir</NeonBtn>
-
-              </div>
-
-            )}
-
-          </div>
-
-          {/* Product picker */}
-
-          {pickerOpen&&cmpProds.length<3&&(
-
-            <div style={{ border:`1px solid rgba(139,47,214,0.3)`,borderTop:"none",borderRadius:"0 0 12px 12px",background:bgE,padding:"14px 18px",display:"flex",gap:10,flexWrap:"wrap" }}>
-
-              {availableProds.length===0
-
-                ? <p className="ghi" style={{ fontSize:13,color:txS }}>No hay más productos disponibles con estos filtros.</p>
-
-                : availableProds.map(p=>(
-
-                  <button key={p.id} onClick={()=>addProduct(p)} style={{
-
-                    display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderRadius:10,
-
-                    background:bgC,border:`1px solid rgba(139,47,214,0.25)`,cursor:"pointer",
-
-                    color:tx,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",
-
+                {cmpProds.map((p,pi)=>(
+                  <div key={p.id} style={{
+                    padding:"20px 18px",background:bgC,
+                    borderRadius:pi===cmpProds.length-1&&cmpProds.length===3?"0 12px 0 0":"none",
+                    border:`1px solid rgba(139,47,214,0.2)`,borderLeft:"none",borderBottom:"none",
+                    display:"flex",flexDirection:"column",gap:10,
                   }}>
-
-                    <div style={{ width:34,height:34,borderRadius:6,overflow:"hidden",flexShrink:0 }}>
-
-                      <img src={imgUrl(p.imgId,68,68)} alt={p.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
-
+                    <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8 }}>
+                      <div style={{ width:96,height:96,borderRadius:12,overflow:"hidden",background:bgE,flexShrink:0,border:`1px solid rgba(139,47,214,0.25)` }}>
+                        <img src={imgUrl(p.imgId,192,192)} alt={p.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
+                      </div>
+                      <button onClick={()=>removeProduct(p.id)} title="Quitar" style={{
+                        background:"rgba(255,69,0,0.1)",border:`1px solid rgba(255,69,0,0.35)`,borderRadius:8,
+                        cursor:"pointer",color:"#FF4500",width:28,height:28,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        transition:"all 0.2s",flexShrink:0,
+                      }}><X size={13}/></button>
                     </div>
-
-                    <div style={{ textAlign:"left" }}>
-
-                      <p style={{ fontSize:12,fontWeight:600,margin:0 }}>{p.name}</p>
-
-                      <p style={{ fontSize:11,color:mg,fontWeight:700,margin:0 }}>${p.price}</p>
-
-                    </div>
-
-                  </button>
-
+                    <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>{p.badges.slice(0,2).map(b=><Badge key={b} label={b}/>)}</div>
+                    <p className="ghr" style={{ fontSize:15,fontWeight:700,color:tx,lineHeight:1.25 }}>{p.name}</p>
+                    <PriceTag price={p.price} orig={p.orig}/>
+                    <NeonBtn variant="ghost" small onClick={() => {
+                      if ((window as any).addToCart) (window as any).addToCart(p);
+                    }} style={{ marginTop: 4, fontSize: 11 }}><ShoppingCart size={12}/> + Carrito</NeonBtn>
+                  </div>
                 ))}
+                {cmpProds.length<3&&(
+                  <div style={{
+                    padding:"20px 18px",background:bgC,borderRadius:"0 12px 0 0",
+                    border:`1px solid rgba(139,47,214,0.2)`,borderLeft:"none",borderBottom:"none",
+                    display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:190,
+                  }}>
+                    <div style={{ width:52,height:52,borderRadius:"50%",background:"rgba(139,47,214,0.1)",border:`2px dashed rgba(139,47,214,0.35)`,display:"flex",alignItems:"center",justifyContent:"center" }}>
+                      <Plus size={20} color={vi} strokeWidth={1.5}/>
+                    </div>
+                    <p className="ghi" style={{ fontSize:12,color:txS,textAlign:"center" }}>Agregar producto</p>
+                    <NeonBtn variant="ghost" onClick={()=>setPickerOpen(o=>!o)}><Plus size={12}/>Añadir</NeonBtn>
+                  </div>
+                )}
+              </div>
 
-            </div>
-
+              {/* Product picker */}
+              {pickerOpen&&cmpProds.length<3&&(
+                <div style={{ border:`1px solid rgba(139,47,214,0.3)`,borderTop:"none",borderRadius:"0 0 12px 12px",background:bgE,padding:"14px 18px",display:"flex",gap:10,flexWrap:"wrap" }}>
+                  {availableProds.length===0
+                    ? <p className="ghi" style={{ fontSize:13,color:txS }}>No hay más productos disponibles con estos filtros.</p>
+                    : availableProds.map(p=>(
+                      <button key={p.id} onClick={()=>addProduct(p)} style={{
+                        display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderRadius:10,
+                        background:bgC,border:`1px solid rgba(139,47,214,0.25)`,cursor:"pointer",
+                        color:tx,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",
+                      }}>
+                        <div style={{ width:34,height:34,borderRadius:6,overflow:"hidden",flexShrink:0 }}>
+                          <img src={imgUrl(p.imgId,68,68)} alt={p.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
+                        </div>
+                        <div style={{ textAlign:"left" }}>
+                          <p style={{ fontSize:12,fontWeight:600,margin:0 }}>{p.name}</p>
+                          <p style={{ fontSize:11,color:mg,fontWeight:700,margin:0 }}>${p.price}</p>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </>
           )}
 
           {/* Empty state */}
@@ -3237,7 +3166,32 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 
               <p className="ghi" style={{ fontSize:13,marginBottom:24 }}>Añade productos para comparar sus especificaciones</p>
 
-              <NeonBtn variant="primary" onClick={()=>onNav("catalog")}><ShoppingCart size={14}/>Ir al catálogo</NeonBtn>
+              <div style={{ display:"flex",justifyContent:"center",gap:12,marginBottom:pickerOpen?24:0 }}>
+                <NeonBtn variant="primary" onClick={()=>setPickerOpen(o=>!o)}><Plus size={14}/>Añadir producto</NeonBtn>
+                <NeonBtn variant="ghost" onClick={()=>onNav("catalog")}><ShoppingCart size={14}/>Ir al catálogo</NeonBtn>
+              </div>
+
+              {pickerOpen && (
+                <div style={{ border:`1px solid rgba(139,47,214,0.3)`,borderRadius:12,background:bgE,padding:"14px 18px",display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginTop:20 }}>
+                  {availableProds.length===0
+                    ? <p className="ghi" style={{ fontSize:13,color:txS }}>No hay más productos disponibles.</p>
+                    : availableProds.map(p=>(
+                      <button key={p.id} onClick={()=>addProduct(p)} style={{
+                        display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderRadius:10,
+                        background:bgC,border:`1px solid rgba(139,47,214,0.25)`,cursor:"pointer",
+                        color:tx,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",
+                      }}>
+                        <div style={{ width:34,height:34,borderRadius:6,overflow:"hidden",flexShrink:0 }}>
+                          <img src={imgUrl(p.imgId,68,68)} alt={p.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
+                        </div>
+                        <div style={{ textAlign:"left" }}>
+                          <p style={{ fontSize:12,fontWeight:600,margin:0 }}>{p.name}</p>
+                          <p style={{ fontSize:11,color:mg,fontWeight:700,margin:0 }}>${p.price}</p>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              )}
 
             </div>
 
@@ -3703,7 +3657,7 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
 
       {/* Centered main content */}
 
-      <div style={{ marginLeft:64,flex:1,display:"flex",justifyContent:"center",padding:"40px 32px 60px",overflowY:"auto",maxHeight:"calc(100vh - 56px)" }} className="thin-scroll">
+      <div style={{ marginLeft:80,flex:1,display:"flex",justifyContent:"center",padding:"40px 32px 60px",overflowY:"auto",maxHeight:"calc(100vh - 56px)" }} className="thin-scroll">
 
         <div style={{ width:"100%",maxWidth:1100,display:"grid",gridTemplateColumns:"1fr 420px",gap:32,alignItems:"start" }}>
 

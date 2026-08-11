@@ -1361,9 +1361,6 @@ export default function App() {
         )}
         {(screen==="login"||screen==="register")&&isMobile&&(
           <div style={{ position:"relative", height:"100%" }}>
-            <button onClick={()=>nav("home")} style={{ position:"absolute", top:12, left:16, zIndex:100, padding:"6px 12px", borderRadius:8, background:bgC, border:`1px solid rgba(139,47,214,0.3)`, color:tx, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600 }}>
-              ← Tienda
-            </button>
             <AuthMobile onLogin={login} initialTab={screen === "register" ? "register" : "login"}/>
           </div>
         )}
