@@ -223,8 +223,8 @@ export default function App() {
   }, [screen]);
 
   const [role,       setRole]       = useState<AuthRole>("guest");
-
-  const [isMobile,   setIsMobile]   = useState(false);
+  const [returnScreen, setReturnScreen] = useState<string | null>(null);
+  const [isMobile,   setIsMobile]   = useState(typeof window !== "undefined" ? window.innerWidth < 1200 : false);
 
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -290,7 +290,7 @@ export default function App() {
 
     const handleResize = () => {
 
-      setIsMobile(window.innerWidth < 1024);
+      setIsMobile(window.innerWidth < 1200);
 
     };
 
