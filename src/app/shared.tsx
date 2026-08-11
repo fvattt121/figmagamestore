@@ -4161,6 +4161,7 @@ export function CheckoutShipMobile({ onNav }:{ onNav:(s:string)=>void }) {
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,zIndex:20 }}>
         <div style={{ marginBottom:14 }}><CheckoutProgress step={1} mobile/></div>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+          <button onClick={()=>onNav("cart")} style={{ background:"none",border:"none",cursor:"pointer",color:txS,marginRight:4,padding:4,display:"flex",alignItems:"center" }}><ChevronLeft size={22}/></button>
           <MapPin size={15} color={mg}/>
           <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>DATOS DE ENVÍO</span>
         </div>
@@ -4438,6 +4439,8 @@ export function CheckoutPayMobile({ onNav }:{ onNav:(s:string)=>void }) {
 
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
 
+          <button onClick={()=>onNav("checkout-1")} style={{ background:"none",border:"none",cursor:"pointer",color:txS,marginRight:4,padding:4,display:"flex",alignItems:"center" }}><ChevronLeft size={22}/></button>
+
           <CreditCard size={15} color={mg}/>
 
           <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>PAGO</span>
@@ -4662,7 +4665,13 @@ export function CheckoutReviewMobile({ onNav, cartItems }:{ onNav:(s:string)=>vo
 
         <div style={{ marginBottom:14 }}><CheckoutProgress step={3} mobile/></div>
 
-        <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>REVISIÓN</span>
+        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+
+          <button onClick={()=>onNav("checkout-2")} style={{ background:"none",border:"none",cursor:"pointer",color:txS,marginRight:4,padding:4,display:"flex",alignItems:"center" }}><ChevronLeft size={22}/></button>
+
+          <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>REVISIÓN</span>
+
+        </div>
 
       </div>
 

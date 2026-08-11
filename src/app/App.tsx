@@ -455,27 +455,42 @@ export default function App() {
       return;
     }
 
-    if (window.location.hash !== `#${s}`) {
-      window.location.hash = s;
+    const performNav = () => {
+      if (window.location.hash !== `#${s}`) {
+        window.location.hash = s;
+      }
+      setScreen(s as Screen);
+      if (s === "confirmation") {
+        const orderNum = Math.floor(Math.random() * 90000) + 10000;
+        setNotifications(prev => [
+          {
+            id: Date.now(),
+            title: "🛒 ¡Compra Completada!",
+            desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
+            date: "Ahora mismo",
+            actionLabel: "Ver Pedidos",
+            targetScreen: "profile"
+          },
+          ...prev
+        ]);
+        toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
+      }
+    };
+
+    if (isMobile && pushedRef.current) {
+      pushedRef.current = false;
+      setMenuOpen(false);
+      setNotifOpen(false);
+      setSearchOpen(false);
+      setModalType(null);
+      if (window.history.state?.overlayOpen) {
+        window.history.back();
+        setTimeout(performNav, 50);
+        return;
+      }
     }
 
-    setScreen(s as Screen);
-
-    if (s === "confirmation") {
-      const orderNum = Math.floor(Math.random() * 90000) + 10000;
-      setNotifications(prev => [
-        {
-          id: Date.now(),
-          title: "🛒 ¡Compra Completada!",
-          desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
-          date: "Ahora mismo",
-          actionLabel: "Ver Pedidos",
-          targetScreen: "profile"
-        },
-        ...prev
-      ]);
-      toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
-    }
+    performNav();
   };
 
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
