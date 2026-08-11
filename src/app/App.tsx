@@ -250,7 +250,6 @@ export default function App() {
 
   const nav = (s:string) => {
     setSearchOpen(false);
-<<<<<<< HEAD
 
     // Auth guard for guest users accessing profile or checkout
     if (role === "guest" && (s === "profile" || s.startsWith("checkout"))) {
@@ -259,11 +258,9 @@ export default function App() {
       return;
     }
 
-=======
     if (window.location.hash !== `#${s}`) {
       window.location.hash = s;
     }
->>>>>>> 9bd9bab0e87b326f17532dcd41a7e047bcbf6218
     setScreen(s as Screen);
     if (s === "confirmation") {
       const orderNum = Math.floor(Math.random() * 90000) + 10000;
