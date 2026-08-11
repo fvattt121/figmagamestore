@@ -872,9 +872,7 @@ export default function App() {
 
       <Toaster theme="dark" position="bottom-right" toastOptions={{ style:{ background:"#150A24",border:"1px solid rgba(255,46,158,0.35)",color:"#F0E6FF" } }}/>
 
-      {/* ─── Top navigation (desktop only) ─── */}
-
-      {!isMobile && (
+      {!isMobile && screen !== "login" && screen !== "register" && (
 
       <div style={{ position:"sticky",top:0,zIndex:500,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",borderBottom:`1px solid rgba(139,47,214,0.25)`,height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px" }}>
 
@@ -1108,7 +1106,7 @@ export default function App() {
 
       {/* Mobile Header (Sticky across ALL mobile views) */}
 
-      {isMobile && (
+      {isMobile && screen !== "login" && screen !== "register" && (
 
         <div style={{
 
