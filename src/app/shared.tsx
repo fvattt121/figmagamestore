@@ -4198,6 +4198,7 @@ export function CheckoutShipMobile({ onNav, user, shippingData, setShippingData 
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,zIndex:20 }}>
         <div style={{ marginBottom:14 }}><CheckoutProgress step={1} mobile/></div>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+          <button onClick={()=>onNav("cart")} style={{ background:"none",border:"none",cursor:"pointer",color:txS,marginRight:4,padding:4,display:"flex",alignItems:"center" }}><ChevronLeft size={22}/></button>
           <MapPin size={15} color={mg}/>
           <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>DATOS DE ENVÍO</span>
         </div>

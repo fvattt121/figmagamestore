@@ -455,27 +455,42 @@ export default function App() {
       return;
     }
 
-    if (window.location.hash !== `#${s}`) {
-      window.location.hash = s;
+    const performNav = () => {
+      if (window.location.hash !== `#${s}`) {
+        window.location.hash = s;
+      }
+      setScreen(s as Screen);
+      if (s === "confirmation") {
+        const orderNum = Math.floor(Math.random() * 90000) + 10000;
+        setNotifications(prev => [
+          {
+            id: Date.now(),
+            title: "🛒 ¡Compra Completada!",
+            desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
+            date: "Ahora mismo",
+            actionLabel: "Ver Pedidos",
+            targetScreen: "profile"
+          },
+          ...prev
+        ]);
+        toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
+      }
+    };
+
+    if (isMobile && pushedRef.current) {
+      pushedRef.current = false;
+      setMenuOpen(false);
+      setNotifOpen(false);
+      setSearchOpen(false);
+      setModalType(null);
+      if (window.history.state?.overlayOpen) {
+        window.history.back();
+        setTimeout(performNav, 50);
+        return;
+      }
     }
 
-    setScreen(s as Screen);
-
-    if (s === "confirmation") {
-      const orderNum = Math.floor(Math.random() * 90000) + 10000;
-      setNotifications(prev => [
-        {
-          id: Date.now(),
-          title: "🛒 ¡Compra Completada!",
-          desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
-          date: "Ahora mismo",
-          actionLabel: "Ver Pedidos",
-          targetScreen: "profile"
-        },
-        ...prev
-      ]);
-      toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
-    }
+    performNav();
   };
 
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
@@ -848,6 +863,77 @@ export default function App() {
     { name: "Usuario", group: 3, color: cy },
 
   ];
+
+  // Draggable Accessibility FAB logic
+  const [fabPos, setFabPos] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setFabPos({ x: window.innerWidth - 70, y: window.innerHeight - 70 });
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setFabPos(prev => {
+        const x = Math.min(prev.x, window.innerWidth - 60);
+        const y = Math.min(prev.y, window.innerHeight - 60);
+        return { x, y };
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const onDragStart = (clientX: number, clientY: number) => {
+    isDraggingRef.current = false;
+    dragStartRef.current = { x: clientX, y: clientY };
+    dragOffsetRef.current = { x: clientX - fabPos.x, y: clientY - fabPos.y };
+  };
+
+  const onDragMove = (clientX: number, clientY: number) => {
+    const dx = clientX - dragStartRef.current.x;
+    const dy = clientY - dragStartRef.current.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      isDraggingRef.current = true;
+    }
+    if (isDraggingRef.current) {
+      let newX = clientX - dragOffsetRef.current.x;
+      let newY = clientY - dragOffsetRef.current.y;
+      newX = Math.max(10, Math.min(newX, window.innerWidth - 60));
+      newY = Math.max(10, Math.min(newY, window.innerHeight - 60));
+      setFabPos({ x: newX, y: newY });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    onDragStart(e.clientX, e.clientY);
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      onDragMove(moveEvent.clientX, moveEvent.clientY);
+    };
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    onDragStart(touch.clientX, touch.clientY);
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      const touchMove = moveEvent.touches[0];
+      onDragMove(touchMove.clientX, touchMove.clientY);
+    };
+    const handleTouchEnd = () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd);
+  };
 
   return (
 
@@ -1399,69 +1485,40 @@ export default function App() {
       {/* ─── Premium Accessibility Floating Action Button ─── */}
 
       {screen !== "accessibility" && (
-
         <button
-
-          onClick={() => nav("accessibility")}
-
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          onClick={(e) => {
+            if (isDraggingRef.current) {
+              e.preventDefault();
+              e.stopPropagation();
+            } else {
+              nav("accessibility");
+            }
+          }}
           title="Accesibilidad"
-
           className="neon-btn-cy"
-
           style={{
-
             position: "fixed",
-
-            bottom: 20,
-
-            right: 20,
-
+            left: fabPos.x || "calc(100vw - 70px)",
+            top: fabPos.y || "calc(100vh - 70px)",
             width: 50,
-
             height: 50,
-
             borderRadius: "50%",
-
             background: `linear-gradient(135deg, ${cy}, ${vi})`,
-
             border: "none",
-
-            cursor: "pointer",
-
+            cursor: "grab",
             color: "#0A0512",
-
             display: "flex",
-
             alignItems: "center",
-
             justifyContent: "center",
-
             boxShadow: GC,
-
             zIndex: 1000,
-
-            transition: "all 0.2s ease",
-
+            touchAction: "none",
           }}
-
-          onMouseEnter={e => {
-
-            e.currentTarget.style.transform = "scale(1.1)";
-
-          }}
-
-          onMouseLeave={e => {
-
-            e.currentTarget.style.transform = "scale(1)";
-
-          }}
-
         >
-
           <Eye size={22} />
-
         </button>
-
       )}
 
       {/* ─── Custom Premium Legal Document Modal Overlay ─── */}
