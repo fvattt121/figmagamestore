@@ -4079,9 +4079,29 @@ export function CartMobile({ onNav, cartItems, setCartItems }:{
 
 /* ── CHECKOUT STEP 1 — SHIPPING (DESKTOP) ── */
 
-export function CheckoutShipDesktop({ onNav }:{ onNav:(s:string)=>void }) {
-  const [f, setF] = useState({ nombre:"",apellido:"",email:"",telefono:"",direccion:"",numero:"",ciudad:"",cp:"",pais:"México",metodo:"standard" });
-  const u = (k:string,v:string)=>setF(p=>({...p,[k]:v}));
+export function CheckoutShipDesktop({ onNav, user, shippingData, setShippingData }:{ onNav:(s:string)=>void; user?:any; shippingData?:any; setShippingData?:any }) {
+  const defaultEmail = user?.email || "";
+  const defaultName = user?.name ? user.name.split(" ")[0] : "";
+  const defaultLastName = user?.name ? user.name.split(" ").slice(1).join(" ") : "";
+
+  const [f, setF] = useState({
+    nombre: shippingData?.nombre || defaultName,
+    apellido: shippingData?.apellido || defaultLastName,
+    email: shippingData?.email || defaultEmail,
+    telefono: shippingData?.telefono || "",
+    direccion: shippingData?.direccion || "",
+    numero: shippingData?.numero || "",
+    ciudad: shippingData?.ciudad || "",
+    cp: shippingData?.cp || "",
+    pais: shippingData?.pais || "México",
+    metodo: shippingData?.metodo || "standard"
+  });
+
+  const u = (k:string,v:string) => {
+    const updated = { ...f, [k]: v };
+    setF(updated);
+    if (setShippingData) setShippingData(updated);
+  };
   const valid = f.nombre&&f.apellido&&f.email&&f.direccion&&f.ciudad&&f.cp;
 
   return (
@@ -4125,7 +4145,7 @@ export function CheckoutShipDesktop({ onNav }:{ onNav:(s:string)=>void }) {
               </label>
             ))}
             <div style={{ marginTop:24 }}>
-              <NeonBtn variant="primary" full disabled={!valid} onClick={()=>onNav("checkout-2")} style={{ padding:"14px",fontSize:15 }}>
+              <NeonBtn variant="primary" full disabled={!valid} onClick={()=>{ if (setShippingData) setShippingData(f); onNav("checkout-2"); }} style={{ padding:"14px",fontSize:15 }}>
                 Continuar al pago <ArrowRight size={16}/>
               </NeonBtn>
             </div>
@@ -4151,9 +4171,26 @@ export function CheckoutShipDesktop({ onNav }:{ onNav:(s:string)=>void }) {
 
 /* ── CHECKOUT STEP 1 — SHIPPING (MOBILE) ── */
 
-export function CheckoutShipMobile({ onNav }:{ onNav:(s:string)=>void }) {
-  const [f, setF] = useState({ nombre:"",apellido:"",email:"",telefono:"",direccion:"",ciudad:"",cp:"",metodo:"standard" });
-  const u = (k:string,v:string)=>setF(p=>({...p,[k]:v}));
+export function CheckoutShipMobile({ onNav, user, shippingData, setShippingData }:{ onNav:(s:string)=>void; user?:any; shippingData?:any; setShippingData?:any }) {
+  const defaultEmail = user?.email || "";
+  const defaultName = user?.name || "";
+
+  const [f, setF] = useState({
+    nombre: shippingData?.nombre || defaultName,
+    apellido: shippingData?.apellido || "",
+    email: shippingData?.email || defaultEmail,
+    telefono: shippingData?.telefono || "",
+    direccion: shippingData?.direccion || "",
+    ciudad: shippingData?.ciudad || "",
+    cp: shippingData?.cp || "",
+    metodo: shippingData?.metodo || "standard"
+  });
+
+  const u = (k:string,v:string) => {
+    const updated = { ...f, [k]: v };
+    setF(updated);
+    if (setShippingData) setShippingData(updated);
+  };
   const valid = f.nombre&&f.email&&f.direccion&&f.ciudad&&f.cp;
 
   return (
@@ -4167,645 +4204,446 @@ export function CheckoutShipMobile({ onNav }:{ onNav:(s:string)=>void }) {
       </div>
 
       <div style={{ flex:1,padding:"20px 16px",display:"flex",flexDirection:"column",gap:12 }}>
-
         <FloatInput label="Nombre completo" value={f.nombre} onChange={v=>u("nombre",v)} required/>
-
         <FloatInput label="Email" value={f.email} onChange={v=>u("email",v)} type="email" required/>
-
         <FloatInput label="Teléfono" value={f.telefono} onChange={v=>u("telefono",v)} inputMode="tel"/>
-
         <FloatInput label="Dirección" value={f.direccion} onChange={v=>u("direccion",v)} required/>
-
         <FloatInput label="Ciudad" value={f.ciudad} onChange={v=>u("ciudad",v)} required/>
-
         <FloatInput label="Código postal" value={f.cp} onChange={v=>u("cp",v)} inputMode="numeric" required/>
 
         <p className="ghi" style={{ fontSize:11,color:txS,letterSpacing:"0.07em",marginTop:4 }}>MÉTODO</p>
-
         {[{ id:"standard",label:"Estándar",detail:"5-7 días",price:"Gratis",pColor:ok },{ id:"express",label:"Express",detail:"2-3 días",price:"+$9.99",pColor:cy }].map(m=>(
-
           <label key={m.id} style={{ display:"flex",alignItems:"center",gap:10,padding:"12px",borderRadius:10,cursor:"pointer",background:f.metodo===m.id?`rgba(255,46,158,0.08)`:bgE,border:`1px solid ${f.metodo===m.id?mg+"66":"rgba(139,47,214,0.25)"}` }}>
-
             <div onClick={()=>u("metodo",m.id)} style={{ width:16,height:16,borderRadius:"50%",border:`2px solid ${f.metodo===m.id?mg:"rgba(255,255,255,0.2)"}`,background:f.metodo===m.id?mg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
-
               {f.metodo===m.id&&<div style={{ width:6,height:6,borderRadius:"50%",background:"#fff" }}/>}
-
             </div>
-
             <div style={{ flex:1 }}>
-
               <span className="ghi" style={{ fontSize:12,fontWeight:600,color:tx }}>{m.label}</span>
-
               <p className="ghi" style={{ fontSize:10,color:txS,margin:0 }}>{m.detail}</p>
-
             </div>
-
             <span className="ghi" style={{ fontSize:12,fontWeight:700,color:m.pColor }}>{m.price}</span>
-
           </label>
-
         ))}
-
       </div>
 
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)` }}>
-
-        <NeonBtn variant="primary" full disabled={!valid} onClick={()=>onNav("checkout-2")} style={{ padding:"14px",fontSize:15 }}>
-
+        <NeonBtn variant="primary" full disabled={!valid} onClick={()=>{ if (setShippingData) setShippingData(f); onNav("checkout-2"); }} style={{ padding:"14px",fontSize:15 }}>
           Continuar al pago <ArrowRight size={16}/>
-
         </NeonBtn>
-
       </div>
-
     </div>
-
   );
-
 }
 
 /* ── CHECKOUT STEP 2 — PAYMENT (DESKTOP) ── */
 
-export function CheckoutPayDesktop({ onNav, cartItems }:{ onNav:(s:string)=>void; cartItems:CartItemType[] }) {
+export function CheckoutPayDesktop({ onNav, cartItems, user, shippingData, paymentData, setPaymentData }:{ onNav:(s:string)=>void; cartItems:CartItemType[]; user?:any; shippingData?:any; paymentData?:any; setPaymentData?:any }) {
+  const defaultHolder = shippingData?.nombre ? `${shippingData.nombre} ${shippingData.apellido||""}`.trim() : (user?.name || "");
+  const [method, setMethod] = useState<"card"|"paypal"|"wallet">(paymentData?.method || "card");
+  const [card, setCard] = useState({
+    num: paymentData?.num || "",
+    name: paymentData?.name || defaultHolder,
+    exp: paymentData?.exp || "",
+    cvv: paymentData?.cvv || ""
+  });
 
-  const [method, setMethod] = useState<"card"|"paypal"|"wallet">("card");
+  const uc = (k:string,v:string) => {
+    const updated = { ...card, [k]: v };
+    setCard(updated);
+    if (setPaymentData) setPaymentData({ method, ...updated });
+  };
 
-  const [card, setCard] = useState({ num:"",name:"",exp:"",cvv:"" });
-
-  const uc = (k:string,v:string)=>setCard(p=>({...p,[k]:v}));
+  const handleMethodChange = (m:"card"|"paypal"|"wallet") => {
+    setMethod(m);
+    if (setPaymentData) setPaymentData({ method: m, ...card });
+  };
 
   const valid = method!=="card"||(card.num.replace(/\s/g,"").length===16&&card.name&&card.exp.length===5&&card.cvv.length===3);
-
   const { total } = calcTotals(cartItems);
 
   return (
-
     <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"40px 60px" }} className="thin-scroll">
-
       <div style={{ maxWidth:960,margin:"0 auto" }}>
-
         <CheckoutProgress step={2}/>
-
         <div style={{ display:"grid",gridTemplateColumns:"1fr 380px",gap:40 }}>
-
           <div>
-
             <h2 className="ghr" style={{ fontSize:26,fontWeight:700,color:tx,letterSpacing:"0.05em",marginBottom:28,display:"flex",alignItems:"center",gap:10 }}><CreditCard size={22} color={mg}/>MÉTODO DE PAGO</h2>
-
             {/* Method buttons */}
-
             <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28 }}>
-
               {[{ id:"card",label:"Tarjeta",sub:"Visa, MC, Amex",Icon:CreditCard },{ id:"paypal",label:"PayPal",sub:"paypal.com",Icon:Wallet },{ id:"wallet",label:"Billetera",sub:"Apple / Google Pay",Icon:Smartphone }].map(m=>(
-
-                <button key={m.id} onClick={()=>setMethod(m.id as "card"|"paypal"|"wallet")}
-
+                <button key={m.id} onClick={()=>handleMethodChange(m.id as any)}
                   style={{ padding:"18px 14px",borderRadius:12,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:8,background:method===m.id?`rgba(255,46,158,0.1)`:bgE,border:`2px solid ${method===m.id?mg:"rgba(139,47,214,0.25)"}`,boxShadow:method===m.id?GM:"none",transition:"all 0.2s" }}>
-
                   <m.Icon size={24} color={method===m.id?mg:txS}/>
-
                   <span className="ghi" style={{ fontSize:13,fontWeight:700,color:method===m.id?tx:txS }}>{m.label}</span>
-
                   <span className="ghi" style={{ fontSize:10,color:txS }}>{m.sub}</span>
-
                 </button>
-
               ))}
-
             </div>
 
             {method==="card"&&(
-
               <div className="fade-up" style={{ display:"flex",flexDirection:"column",gap:14 }}>
-
                 {/* Card preview */}
-
                 <div style={{ borderRadius:16,padding:"22px 24px",background:`linear-gradient(135deg,${vi}88,${mg}44)`,border:`1px solid rgba(255,46,158,0.3)`,boxShadow:GM,position:"relative",overflow:"hidden",marginBottom:8 }}>
-
                   <div style={{ position:"absolute",right:-20,top:-20,width:160,height:160,borderRadius:"50%",background:"rgba(255,46,158,0.08)" }}/>
-
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:30 }}>
-
                     <Zap size={28} color={mg} fill={mg}/>
-
                     <span className="ghi" style={{ fontSize:12,color:"rgba(255,255,255,0.6)" }}>GAMEHUB CARD</span>
-
                   </div>
-
                   <p className="ghr" style={{ fontSize:20,fontWeight:700,color:tx,letterSpacing:"0.12em",marginBottom:16 }}>
-
                     {card.num||"•••• •••• •••• ••••"}
-
                   </p>
-
                   <div style={{ display:"flex",justifyContent:"space-between" }}>
-
                     <span className="ghi" style={{ fontSize:12,color:"rgba(255,255,255,0.7)" }}>{card.name||"NOMBRE TITULAR"}</span>
-
                     <span className="ghi" style={{ fontSize:12,color:"rgba(255,255,255,0.7)" }}>{card.exp||"MM/AA"}</span>
-
                   </div>
-
                 </div>
 
                 <FloatInput label="Número de tarjeta" value={card.num} onChange={v=>uc("num",maskCard(v))} inputMode="numeric"/>
-
                 <FloatInput label="Titular de la tarjeta" value={card.name} onChange={v=>uc("name",v.toUpperCase())} required/>
-
                 <div style={{ display:"flex",gap:12 }}>
-
                   <FloatInput label="Vencimiento (MM/AA)" value={card.exp} onChange={v=>uc("exp",maskExpiry(v))} inputMode="numeric" half/>
-
                   <FloatInput label="CVV" value={card.cvv} onChange={v=>uc("cvv",v.replace(/\D/g,"").slice(0,3))} inputMode="numeric" type="password" half/>
-
                 </div>
-
               </div>
-
             )}
 
             {method==="paypal"&&(
-
               <div className="fade-up" style={{ textAlign:"center",padding:"40px 0" }}>
-
                 <Wallet size={48} color={cy} style={{ marginBottom:16 }}/>
-
                 <p className="ghi" style={{ color:tx,fontSize:16,fontWeight:600 }}>Serás redirigido a PayPal</p>
-
                 <p className="ghi" style={{ color:txS,fontSize:13 }}>Completa el pago de forma segura en tu cuenta PayPal</p>
-
               </div>
-
             )}
 
             {method==="wallet"&&(
-
               <div className="fade-up" style={{ textAlign:"center",padding:"40px 0" }}>
-
                 <Smartphone size={48} color={mg} style={{ marginBottom:16 }}/>
-
                 <p className="ghi" style={{ color:tx,fontSize:16,fontWeight:600 }}>Pago con billetera digital</p>
-
                 <p className="ghi" style={{ color:txS,fontSize:13 }}>Apple Pay · Google Pay · Samsung Pay</p>
-
               </div>
-
             )}
 
             <div style={{ marginTop:24 }}>
-
-              <NeonBtn variant="primary" full disabled={!valid} onClick={()=>onNav("checkout-3")} style={{ padding:"14px",fontSize:15 }}>
-
+              <NeonBtn variant="primary" full disabled={!valid} onClick={()=>{ if (setPaymentData) setPaymentData({ method, ...card }); onNav("checkout-3"); }} style={{ padding:"14px",fontSize:15 }}>
                 Revisar pedido <ArrowRight size={16}/>
-
               </NeonBtn>
-
             </div>
-
           </div>
 
           {/* Order summary sidebar */}
-
           <div style={{ background:bgC,borderRadius:16,padding:24,border:`1px solid rgba(139,47,214,0.2)`,height:"fit-content",position:"sticky",top:20 }}>
-
             <p className="ghr" style={{ fontSize:16,fontWeight:700,color:tx,marginBottom:16,letterSpacing:"0.05em" }}>RESUMEN</p>
-
             {cartItems.map(item=>(
-
               <div key={item.id} style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
-
                 <div style={{ width:40,height:40,borderRadius:8,overflow:"hidden",background:bgE,flexShrink:0 }}>
-
                   <img src={imgUrl(item.imgId,80,80)} alt={item.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
-
                 </div>
-
                 <div style={{ flex:1,minWidth:0 }}>
-
                   <p className="ghi" style={{ fontSize:11,color:tx,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{item.name}</p>
-
                   <p className="ghi" style={{ fontSize:10,color:txS }}>x{item.qty}</p>
-
                 </div>
-
                 <span className="ghi" style={{ fontSize:11,fontWeight:700,color:mg }}>${(item.price*item.qty).toFixed(2)}</span>
-
               </div>
-
             ))}
-
             <div style={{ height:1,background:`linear-gradient(90deg,${mg}44,transparent)`,margin:"12px 0" }}/>
-
             <OrderSummaryPanel items={cartItems}/>
-
             <div style={{ marginTop:16,display:"flex",alignItems:"center",gap:6 }}>
-
               <Shield size={12} color={ok}/>
-
               <span className="ghi" style={{ fontSize:10,color:txS }}>Transacción cifrada SSL 256-bit</span>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 }
 
 /* ── CHECKOUT STEP 2 — PAYMENT (MOBILE) ── */
 
-export function CheckoutPayMobile({ onNav }:{ onNav:(s:string)=>void }) {
+export function CheckoutPayMobile({ onNav, user, shippingData, paymentData, setPaymentData }:{ onNav:(s:string)=>void; user?:any; shippingData?:any; paymentData?:any; setPaymentData?:any }) {
+  const defaultHolder = shippingData?.nombre ? `${shippingData.nombre} ${shippingData.apellido||""}`.trim() : (user?.name || "");
+  const [method, setMethod] = useState<"card"|"paypal"|"wallet">(paymentData?.method || "card");
+  const [card, setCard] = useState({
+    num: paymentData?.num || "",
+    name: paymentData?.name || defaultHolder,
+    exp: paymentData?.exp || "",
+    cvv: paymentData?.cvv || ""
+  });
 
-  const [method, setMethod] = useState<"card"|"paypal"|"wallet">("card");
+  const uc = (k:string,v:string) => {
+    const updated = { ...card, [k]: v };
+    setCard(updated);
+    if (setPaymentData) setPaymentData({ method, ...updated });
+  };
 
-  const [card, setCard] = useState({ num:"",name:"",exp:"",cvv:"" });
-
-  const uc = (k:string,v:string)=>setCard(p=>({...p,[k]:v}));
+  const handleMethodChange = (m:"card"|"paypal"|"wallet") => {
+    setMethod(m);
+    if (setPaymentData) setPaymentData({ method: m, ...card });
+  };
 
   return (
-
     <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column" }}>
-
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,zIndex:20 }}>
-
         <div style={{ marginBottom:14 }}><CheckoutProgress step={2} mobile/></div>
-
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-
           <CreditCard size={15} color={mg}/>
-
           <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>PAGO</span>
-
         </div>
-
       </div>
 
       <div style={{ flex:1,overflowY:"auto",padding:"16px 16px" }} className="thin-scroll">
-
         {/* Method */}
-
         <div style={{ display:"flex",gap:10,marginBottom:20 }}>
-
           {[{ id:"card",Icon:CreditCard,label:"Tarjeta" },{ id:"paypal",Icon:Wallet,label:"PayPal" },{ id:"wallet",Icon:Smartphone,label:"Wallet" }].map(m=>(
-
-            <button key={m.id} onClick={()=>setMethod(m.id as "card"|"paypal"|"wallet")}
-
+            <button key={m.id} onClick={()=>handleMethodChange(m.id as any)}
               style={{ flex:1,padding:"14px 8px",borderRadius:12,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:6,background:method===m.id?`rgba(255,46,158,0.1)`:bgE,border:`2px solid ${method===m.id?mg:"rgba(139,47,214,0.25)"}`,boxShadow:method===m.id?GM:"none" }}>
-
               <m.Icon size={20} color={method===m.id?mg:txS}/>
-
               <span className="ghi" style={{ fontSize:10,fontWeight:700,color:method===m.id?tx:txS }}>{m.label}</span>
-
             </button>
-
           ))}
-
         </div>
 
         {method==="card"&&(
-
           <div style={{ display:"flex",flexDirection:"column",gap:12 }}>
-
             <FloatInput label="Número de tarjeta" value={card.num} onChange={v=>uc("num",maskCard(v))} inputMode="numeric"/>
-
             <FloatInput label="Titular" value={card.name} onChange={v=>uc("name",v.toUpperCase())} required/>
-
             <div style={{ display:"flex",gap:12 }}>
-
               <FloatInput label="MM/AA" value={card.exp} onChange={v=>uc("exp",maskExpiry(v))} inputMode="numeric" half/>
-
               <FloatInput label="CVV" value={card.cvv} onChange={v=>uc("cvv",v.replace(/\D/g,"").slice(0,3))} inputMode="numeric" type="password" half/>
-
             </div>
-
           </div>
-
         )}
 
         {method!=="card"&&(
-
           <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"40px 0" }}>
-
             {method==="paypal"?<Wallet size={40} color={cy}/>:<Smartphone size={40} color={mg}/>}
-
             <p className="ghi" style={{ color:tx,fontSize:14,fontWeight:600,marginTop:12,marginBottom:0 }}>
-
               {method==="paypal"?"Continuar con PayPal":"Pago con Wallet"}
-
             </p>
-
           </div>
-
         )}
-
       </div>
 
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)` }}>
-
-        <NeonBtn variant="primary" full onClick={()=>onNav("checkout-3")} style={{ padding:"14px",fontSize:15 }}>
-
+        <NeonBtn variant="primary" full onClick={()=>{ if (setPaymentData) setPaymentData({ method, ...card }); onNav("checkout-3"); }} style={{ padding:"14px",fontSize:15 }}>
           Revisar pedido <ArrowRight size={16}/>
-
         </NeonBtn>
-
       </div>
-
     </div>
-
   );
-
 }
 
 /* ── CHECKOUT STEP 3 — REVIEW ── */
 
-export function CheckoutReviewDesktop({ onNav, cartItems }:{ onNav:(s:string)=>void; cartItems:CartItemType[] }) {
-
+export function CheckoutReviewDesktop({ onNav, cartItems, user, shippingData, paymentData }:{ onNav:(s:string)=>void; cartItems:CartItemType[]; user?:any; shippingData?:any; paymentData?:any }) {
   const [terms, setTerms] = useState(false);
-
   const { total } = calcTotals(cartItems);
 
+  const displayName = shippingData?.nombre
+    ? `${shippingData.nombre} ${shippingData.apellido || ""}`.trim()
+    : (user?.name || "Usuario Gamer");
+  const displayEmail = shippingData?.email || user?.email || "correo@ejemplo.com";
+  const displayAddress = shippingData?.direccion
+    ? `${shippingData.direccion}${shippingData.numero ? " No. " + shippingData.numero : ""} · ${shippingData.ciudad || "CDMX"}, ${shippingData.cp || ""} · ${shippingData.pais || "México"}`
+    : "Av. Paseo de la Reforma 180, Piso 3 · CDMX, 06600 · México";
+
+  const metodoLabel = shippingData?.metodo === "express"
+    ? "Entrega Express — 2-3 días laborables (+$9.99)"
+    : shippingData?.metodo === "sameday"
+    ? "Entrega Same-day — Hoy antes de las 21h (+$19.99)"
+    : "Entrega Estándar — 5-7 días laborables (Gratis)";
+
+  const payMethod = paymentData?.method || "card";
+  const cardLast4 = paymentData?.num ? paymentData.num.replace(/\s/g, "").slice(-4) : "4242";
+  const cardHolder = paymentData?.name || displayName;
+
   return (
-
     <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"40px 60px" }} className="thin-scroll">
-
       <div style={{ maxWidth:800,margin:"0 auto" }}>
-
         <CheckoutProgress step={3}/>
-
         <h2 className="ghr" style={{ fontSize:24,fontWeight:700,color:tx,letterSpacing:"0.05em",marginBottom:28 }}>REVISIÓN DEL PEDIDO</h2>
-
         <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
-
           {/* Items */}
-
           <ReviewCard title="ARTÍCULOS">
-
             {cartItems.map(item=>(
-
               <div key={item.id} style={{ display:"flex",alignItems:"center",gap:16,padding:"14px 0",borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
-
                 <div style={{ width:72,height:72,borderRadius:12,overflow:"hidden",background:bgE,flexShrink:0,border:`1px solid rgba(139,47,214,0.2)` }}><img src={imgUrl(item.imgId,144,144)} alt={item.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/></div>
-
                 <div style={{ flex:1 }}>
-
                   <p className="ghi" style={{ fontSize:15,fontWeight:700,color:tx }}>{item.name}</p>
-
                   <p className="ghi" style={{ fontSize:12,color:txS,marginTop:3 }}>{item.variant} · x{item.qty}</p>
-
                 </div>
-
                 <span className="ghr" style={{ fontSize:17,fontWeight:700,color:mg }}>${(item.price*item.qty).toFixed(2)}</span>
-
               </div>
-
             ))}
-
           </ReviewCard>
 
           {/* Shipping */}
-
           <ReviewCard title="DIRECCIÓN DE ENVÍO">
-
-            <p className="ghi" style={{ fontSize:13,color:tx }}>Carlos García · carlos@email.com</p>
-
-            <p className="ghi" style={{ fontSize:13,color:txS }}>Av. Paseo de la Reforma 180, Piso 3 · CDMX, 06600 · México</p>
-
-            <p className="ghi" style={{ fontSize:12,color:cy,marginTop:4,display:"flex",alignItems:"center",gap:5 }}><Truck size={11}/>Entrega Express — 2-3 días laborables</p>
-
+            <p className="ghi" style={{ fontSize:13,color:tx }}>{displayName} · {displayEmail}</p>
+            <p className="ghi" style={{ fontSize:13,color:txS }}>{displayAddress}</p>
+            <p className="ghi" style={{ fontSize:12,color:cy,marginTop:4,display:"flex",alignItems:"center",gap:5 }}><Truck size={11}/>{metodoLabel}</p>
           </ReviewCard>
 
           {/* Payment */}
-
           <ReviewCard title="MÉTODO DE PAGO">
-
             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-
               <CreditCard size={18} color={txS}/>
-
               <div>
-
-                <p className="ghi" style={{ fontSize:13,color:tx,fontWeight:600 }}>Tarjeta •••• •••• •••• 4242</p>
-
-                <p className="ghi" style={{ fontSize:11,color:txS }}>Visa — Carlos García · Vence 08/27</p>
-
+                {payMethod === "card" ? (
+                  <>
+                    <p className="ghi" style={{ fontSize:13,color:tx,fontWeight:600 }}>Tarjeta •••• •••• •••• {cardLast4}</p>
+                    <p className="ghi" style={{ fontSize:11,color:txS }}>Visa — {cardHolder} {paymentData?.exp ? `· Vence ${paymentData.exp}` : ""}</p>
+                  </>
+                ) : payMethod === "paypal" ? (
+                  <>
+                    <p className="ghi" style={{ fontSize:13,color:tx,fontWeight:600 }}>PayPal</p>
+                    <p className="ghi" style={{ fontSize:11,color:txS }}>{displayEmail}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="ghi" style={{ fontSize:13,color:tx,fontWeight:600 }}>Billetera Digital</p>
+                    <p className="ghi" style={{ fontSize:11,color:txS }}>Apple Pay / Google Pay</p>
+                  </>
+                )}
               </div>
-
             </div>
-
           </ReviewCard>
 
           {/* Summary */}
-
           <ReviewCard title="RESUMEN ECONÓMICO">
-
             <OrderSummaryPanel items={cartItems}/>
-
           </ReviewCard>
-
         </div>
 
         {/* T&C + CTA */}
-
         <div style={{ marginTop:28,padding:24,background:bgC,borderRadius:16,border:`1px solid rgba(139,47,214,0.2)` }}>
-
           <label style={{ display:"flex",alignItems:"flex-start",gap:12,cursor:"pointer",marginBottom:24 }}>
-
             <div onClick={()=>setTerms(t=>!t)} style={{ width:20,height:20,borderRadius:5,border:`2px solid ${terms?mg:"rgba(255,255,255,0.2)"}`,background:terms?mg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer",marginTop:1,boxShadow:terms?GM:"none",transition:"all 0.15s" }}>
-
               {terms&&<Check size={12} color="#fff" strokeWidth={3}/>}
-
             </div>
-
             <span className="ghi" style={{ fontSize:13,color:txS,lineHeight:1.5 }}>
-
               He leído y acepto los <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openTerms) (window as any).openTerms(); }} style={{color:mg,cursor:"pointer"}}>Términos y Condiciones</span> y la <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openPrivacy) (window as any).openPrivacy(); }} style={{color:mg,cursor:"pointer"}}>Política de Privacidad</span> de GameHub Store. Entiendo que mi pedido es definitivo una vez confirmado.*
-
             </span>
-
           </label>
 
           <NeonBtn variant="primary" full disabled={!terms} onClick={()=>onNav("confirmation")}
-
             style={{ padding:"16px",fontSize:16,letterSpacing:"0.06em",justifyContent:"center" }}>
-
             <Trophy size={18}/> REALIZAR COMPRA DEFINITIVA — ${total.toFixed(2)}
-
           </NeonBtn>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 }
 
-export function CheckoutReviewMobile({ onNav, cartItems }:{ onNav:(s:string)=>void; cartItems:CartItemType[] }) {
-
+export function CheckoutReviewMobile({ onNav, cartItems, user, shippingData, paymentData }:{ onNav:(s:string)=>void; cartItems:CartItemType[]; user?:any; shippingData?:any; paymentData?:any }) {
   const [terms, setTerms] = useState(false);
-
   const { total } = calcTotals(cartItems);
 
+  const displayName = shippingData?.nombre
+    ? `${shippingData.nombre} ${shippingData.apellido || ""}`.trim()
+    : (user?.name || "Usuario Gamer");
+  const displayAddress = shippingData?.direccion
+    ? `${shippingData.direccion}, ${shippingData.ciudad || "CDMX"}`
+    : "Reforma 180, CDMX";
+  const metodoShort = shippingData?.metodo === "express" ? "Express 2-3d" : shippingData?.metodo === "sameday" ? "Same-day 24h" : "Estándar 5-7d";
+
+  const payMethod = paymentData?.method || "card";
+  const cardLast4 = paymentData?.num ? paymentData.num.replace(/\s/g, "").slice(-4) : "4242";
+
   return (
-
     <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column" }}>
-
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,zIndex:20 }}>
-
         <div style={{ marginBottom:14 }}><CheckoutProgress step={3} mobile/></div>
-
         <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>REVISIÓN</span>
-
       </div>
 
       <div style={{ flex:1,overflowY:"auto",padding:"16px 16px",display:"flex",flexDirection:"column",gap:12 }} className="thin-scroll">
-
         <ReviewCard title="ARTÍCULOS" compact>
-
           {cartItems.map(item=>(
-
             <div key={item.id} style={{ display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
-
               <div style={{ width:36,height:36,borderRadius:6,overflow:"hidden",background:bgE,flexShrink:0 }}><img src={imgUrl(item.imgId,72,72)} alt={item.name} style={{ width:"100%",height:"100%",objectFit:"cover" }}/></div>
-
               <div style={{ flex:1 }}><p className="ghi" style={{ fontSize:12,fontWeight:600,color:tx,lineHeight:1.2 }}>{item.name}</p><p className="ghi" style={{ fontSize:10,color:txS }}>x{item.qty}</p></div>
-
               <span className="ghi" style={{ fontSize:12,fontWeight:700,color:mg }}>${(item.price*item.qty).toFixed(2)}</span>
-
             </div>
-
           ))}
-
         </ReviewCard>
 
         <ReviewCard title="ENVÍO" compact>
-
-          <p className="ghi" style={{ fontSize:12,color:tx }}>Reforma 180, CDMX · Express 2-3d</p>
-
+          <p className="ghi" style={{ fontSize:12,color:tx }}>{displayName} · {displayAddress} · {metodoShort}</p>
         </ReviewCard>
 
         <ReviewCard title="PAGO" compact>
-
-          <div style={{ display:"flex",alignItems:"center",gap:8 }}><CreditCard size={14} color={txS}/><p className="ghi" style={{ fontSize:12,color:tx }}>•••• •••• •••• 4242 (Visa)</p></div>
-
+          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            <CreditCard size={14} color={txS}/>
+            <p className="ghi" style={{ fontSize:12,color:tx }}>
+              {payMethod === "card" ? `•••• •••• •••• ${cardLast4}` : payMethod === "paypal" ? "PayPal" : "Apple / Google Pay"}
+            </p>
+          </div>
         </ReviewCard>
 
         <ReviewCard title="TOTAL" compact>
-
           <OrderSummaryPanel items={cartItems} compact/>
-
         </ReviewCard>
 
         <label style={{ display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer",padding:"12px",background:bgC,borderRadius:10,border:`1px solid rgba(139,47,214,0.2)` }}>
-
           <div onClick={()=>setTerms(t=>!t)} style={{ width:18,height:18,borderRadius:4,border:`2px solid ${terms?mg:"rgba(255,255,255,0.2)"}`,background:terms?mg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer",marginTop:1,boxShadow:terms?GM:"none" }}>
-
             {terms&&<Check size={10} color="#fff" strokeWidth={3}/>}
-
           </div>
-
           <span className="ghi" style={{ fontSize:11,color:txS,lineHeight:1.5 }}>Acepto los <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openTerms) (window as any).openTerms(); }} style={{color:mg,cursor:"pointer"}}>Términos y Condiciones</span> y la <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openPrivacy) (window as any).openPrivacy(); }} style={{color:mg,cursor:"pointer"}}>Política de Privacidad</span>.*</span>
-
         </label>
-
       </div>
 
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)` }}>
-
         <NeonBtn variant="primary" full disabled={!terms} onClick={()=>onNav("confirmation")} style={{ padding:"14px",fontSize:14,justifyContent:"center" }}>
-
           <Trophy size={15}/>REALIZAR COMPRA — ${total.toFixed(2)}
-
         </NeonBtn>
-
       </div>
-
     </div>
-
   );
-
 }
 
 export function ReviewCard({ title, children, compact=false }:{ title:string; children:React.ReactNode; compact?:boolean }) {
-
   return (
-
     <div style={{ background:bgC,borderRadius:compact?12:14,padding:compact?"14px 16px":"20px 24px",border:`1px solid rgba(139,47,214,0.2)` }}>
-
       <p className="ghi" style={{ fontSize:10,color:txS,letterSpacing:"0.08em",fontWeight:700,marginBottom:compact?8:12 }}>{title}</p>
-
       {children}
-
     </div>
-
   );
-
 }
 
 /* ── CONFIRMACIÓN & TRACKING (DESKTOP) ── */
 
-export function ConfirmDesktop({ onNav }:{ onNav:(s:string)=>void }) {
-
+export function ConfirmDesktop({ onNav, user, shippingData }:{ onNav:(s:string)=>void; user?:any; shippingData?:any }) {
   const TRACKING_ID = "GH-2025-88472-X";
-
   const [copied, setCopied] = useState(false);
-
   const copy = ()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); };
+  const userEmail = shippingData?.email || user?.email || "correo@ejemplo.com";
 
   return (
-
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"60px 24px" }}>
-
-      <div style={{ maxWidth:720,width:"100%" }}>
-
+    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"60px 24px" }} className="thin-scroll">
+      <div style={{ maxWidth:720,width:"100%",margin:"0 auto" }}>
         {/* Trophy header */}
-
         <div style={{ textAlign:"center",marginBottom:40 }}>
-
           <div className="success-pop" style={{ display:"inline-block",marginBottom:16 }}>
-
             <Trophy size={72} color={go} className="trophy-glow"/>
-
           </div>
-
           <h1 className="hero-title" style={{ fontSize:52,lineHeight:1,marginBottom:8 }}>¡GG! GOOD GAME</h1>
-
           <p className="ghr" style={{ fontSize:24,color:tx,fontWeight:600 }}>¡Tu pedido está confirmado!</p>
-
-          <p className="ghi" style={{ fontSize:14,color:txS,marginTop:6 }}>Recibirás un email de confirmación en carlos@email.com</p>
-
+          <p className="ghi" style={{ fontSize:14,color:txS,marginTop:6 }}>Recibirás un email de confirmación en <span style={{color:tx,fontWeight:600}}>{userEmail}</span></p>
         </div>
 
         {/* Tracking ID */}
-
         <div style={{ background:bgC,borderRadius:16,padding:"20px 24px",border:`1px solid rgba(255,183,0,0.3)`,boxShadow:`0 0 20px rgba(255,183,0,0.1)`,marginBottom:24 }}>
-
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-
             <div>
-
               <p className="ghi" style={{ fontSize:11,color:txS,letterSpacing:"0.07em",marginBottom:4 }}>TRACKING ID</p>
-
               <p className="ghr" style={{ fontSize:22,fontWeight:700,color:go,letterSpacing:"0.06em" }}>{TRACKING_ID}</p>
-
             </div>
-
             <button onClick={copy} style={{ display:"flex",alignItems:"center",gap:6,padding:"9px 16px",borderRadius:8,background:copied?`rgba(0,230,118,0.1)`:bgE,border:`1px solid ${copied?ok+"55":"rgba(139,47,214,0.3)"}`,color:copied?ok:txS,cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"'Inter',sans-serif",transition:"all 0.2s" }}>
-
               {copied?<CheckCircle size={14}/>:<Copy size={14}/>}{copied?"¡Copiado!":"Copiar ID"}
-
             </button>
-
           </div>
-
         </div>
 
         {/* Tracking progress */}
@@ -4900,34 +4738,22 @@ export function ConfirmDesktop({ onNav }:{ onNav:(s:string)=>void }) {
 
 /* ── CONFIRMACIÓN & TRACKING (MOBILE) ── */
 
-export function ConfirmMobile({ onNav }:{ onNav:(s:string)=>void }) {
-
+export function ConfirmMobile({ onNav, user, shippingData }:{ onNav:(s:string)=>void; user?:any; shippingData?:any }) {
   const TRACKING_ID = "GH-2025-88472-X";
-
   const [copied, setCopied] = useState(false);
-
   const copy = ()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); };
+  const userEmail = shippingData?.email || user?.email || "correo@ejemplo.com";
 
   return (
-
-    <div style={{ background:bg,height:"100%",overflowY:"auto",padding:"24px 16px" }} className="thin-scroll">
-
+    <div style={{ background:bg,minHeight:"100%",padding:"24px 16px" }}>
       {/* Trophy */}
-
       <div style={{ textAlign:"center",marginBottom:28 }}>
-
         <div className="success-pop" style={{ display:"inline-block",marginBottom:10 }}>
-
           <Trophy size={56} color={go} className="trophy-glow"/>
-
         </div>
-
         <h1 className="hero-title" style={{ fontSize:36,lineHeight:1,marginBottom:6 }}>¡GG! GOOD GAME</h1>
-
         <p className="ghr" style={{ fontSize:16,color:tx,fontWeight:600 }}>¡Pedido confirmado!</p>
-
-        <p className="ghi" style={{ fontSize:11,color:txS,marginTop:4 }}>Email de confirmación enviado</p>
-
+        <p className="ghi" style={{ fontSize:11,color:txS,marginTop:4 }}>Email enviado a <span style={{color:tx,fontWeight:600}}>{userEmail}</span></p>
       </div>
 
       {/* Tracking ID */}

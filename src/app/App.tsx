@@ -489,6 +489,9 @@ export default function App() {
     email: "usuario@gamehub.com"
   });
 
+  const [shippingData, setShippingData] = useState<any>(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
+
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
   const login = (r:"user"|"admin", email?:string) => {
     setRole(r);
@@ -1322,17 +1325,17 @@ export default function App() {
         {screen==="cart"&&!isMobile&&<CartDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} cartItems={cartItems} setCartItems={setCartItems}/>}
         {screen==="cart"&&isMobile&&(<MobileWrapper><CartMobile onNav={nav} cartItems={cartItems} setCartItems={setCartItems}/></MobileWrapper>)}
 
-        {screen==="checkout-1"&&!isMobile&&<CheckoutShipDesktop onNav={nav}/>}
-        {screen==="checkout-1"&&isMobile&&(<MobileWrapper><CheckoutShipMobile onNav={nav}/></MobileWrapper>)}
+        {screen==="checkout-1"&&!isMobile&&<CheckoutShipDesktop onNav={nav} user={currentUser} shippingData={shippingData} setShippingData={setShippingData}/>}
+        {screen==="checkout-1"&&isMobile&&(<MobileWrapper><CheckoutShipMobile onNav={nav} user={currentUser} shippingData={shippingData} setShippingData={setShippingData}/></MobileWrapper>)}
 
-        {screen==="checkout-2"&&!isMobile&&<CheckoutPayDesktop onNav={nav} cartItems={cartItems}/>}
-        {screen==="checkout-2"&&isMobile&&(<MobileWrapper><CheckoutPayMobile onNav={nav}/></MobileWrapper>)}
+        {screen==="checkout-2"&&!isMobile&&<CheckoutPayDesktop onNav={nav} cartItems={cartItems} user={currentUser} shippingData={shippingData} paymentData={paymentData} setPaymentData={setPaymentData}/>}
+        {screen==="checkout-2"&&isMobile&&(<MobileWrapper><CheckoutPayMobile onNav={nav} user={currentUser} shippingData={shippingData} paymentData={paymentData} setPaymentData={setPaymentData}/></MobileWrapper>)}
 
-        {screen==="checkout-3"&&!isMobile&&<CheckoutReviewDesktop onNav={nav} cartItems={cartItems}/>}
-        {screen==="checkout-3"&&isMobile&&(<MobileWrapper><CheckoutReviewMobile onNav={nav} cartItems={cartItems}/></MobileWrapper>)}
+        {screen==="checkout-3"&&!isMobile&&<CheckoutReviewDesktop onNav={nav} cartItems={cartItems} user={currentUser} shippingData={shippingData} paymentData={paymentData}/>}
+        {screen==="checkout-3"&&isMobile&&(<MobileWrapper><CheckoutReviewMobile onNav={nav} cartItems={cartItems} user={currentUser} shippingData={shippingData} paymentData={paymentData}/></MobileWrapper>)}
 
-        {screen==="confirmation"&&!isMobile&&<ConfirmDesktop onNav={nav}/>}
-        {screen==="confirmation"&&isMobile&&(<MobileWrapper><ConfirmMobile onNav={nav}/></MobileWrapper>)}
+        {screen==="confirmation"&&!isMobile&&<ConfirmDesktop onNav={nav} user={currentUser} shippingData={shippingData}/>}
+        {screen==="confirmation"&&isMobile&&(<MobileWrapper><ConfirmMobile onNav={nav} user={currentUser} shippingData={shippingData}/></MobileWrapper>)}
 
         {screen==="admin-dashboard"&&!isMobile&&<AdminDashboardDesktop onNav={nav}/>}
         {screen==="admin-dashboard"&&isMobile&&(<MobileWrapper><AdminDashboardMobile onNav={nav}/></MobileWrapper>)}
