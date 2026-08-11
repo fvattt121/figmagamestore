@@ -4080,170 +4080,93 @@ export function CartMobile({ onNav, cartItems, setCartItems }:{
 /* ── CHECKOUT STEP 1 — SHIPPING (DESKTOP) ── */
 
 export function CheckoutShipDesktop({ onNav }:{ onNav:(s:string)=>void }) {
-
   const [f, setF] = useState({ nombre:"",apellido:"",email:"",telefono:"",direccion:"",numero:"",ciudad:"",cp:"",pais:"México",metodo:"standard" });
-
   const u = (k:string,v:string)=>setF(p=>({...p,[k]:v}));
-
   const valid = f.nombre&&f.apellido&&f.email&&f.direccion&&f.ciudad&&f.cp;
 
   return (
-
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",padding:"40px 60px" }}>
-
+    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"40px 60px" }} className="thin-scroll">
       <div style={{ maxWidth:960,margin:"0 auto" }}>
-
         <CheckoutProgress step={1}/>
-
         <div style={{ display:"grid",gridTemplateColumns:"1fr 380px",gap:40 }}>
-
           {/* Form */}
-
           <div>
-
             <h2 className="ghr" style={{ fontSize:22,fontWeight:700,color:tx,letterSpacing:"0.05em",marginBottom:24,display:"flex",alignItems:"center",gap:8 }}><MapPin size={18} color={mg}/>DATOS DE ENVÍO</h2>
-
             <div style={{ display:"flex",flexWrap:"wrap",gap:12,marginBottom:12 }}>
-
               <FloatInput label="Nombre" value={f.nombre} onChange={v=>u("nombre",v)} required half/>
-
               <FloatInput label="Apellido" value={f.apellido} onChange={v=>u("apellido",v)} required half/>
-
               <FloatInput label="Email" value={f.email} onChange={v=>u("email",v)} type="email" required/>
-
               <FloatInput label="Teléfono" value={f.telefono} onChange={v=>u("telefono",v)} type="tel" inputMode="tel"/>
-
             </div>
-
             <div style={{ display:"flex",flexWrap:"wrap",gap:12,marginBottom:20 }}>
-
               <FloatInput label="Dirección" value={f.direccion} onChange={v=>u("direccion",v)} required/>
-
               <FloatInput label="Número / Piso" value={f.numero} onChange={v=>u("numero",v)} half/>
-
               <FloatInput label="Ciudad" value={f.ciudad} onChange={v=>u("ciudad",v)} required half/>
-
               <FloatInput label="Código postal" value={f.cp} onChange={v=>u("cp",v)} inputMode="numeric" required half/>
-
               <FloatInput label="País" value={f.pais} onChange={v=>u("pais",v)} required half/>
-
             </div>
-
             {/* Delivery method */}
-
             <p className="ghi" style={{ fontSize:11,color:txS,letterSpacing:"0.07em",marginBottom:12 }}>MÉTODO DE ENTREGA</p>
-
             {[
-
               { id:"standard", label:"Estándar",  detail:"5-7 días laborables",  price:"Gratis",     pColor:ok },
-
               { id:"express",  label:"Express",   detail:"2-3 días laborables",  price:"+$9.99",     pColor:cy },
-
               { id:"sameday",  label:"Same-day",  detail:"Hoy antes de las 21h", price:"+$19.99",    pColor:mg },
-
             ].map(m=>(
-
               <label key={m.id} style={{ display:"flex",alignItems:"center",gap:14,padding:"14px",borderRadius:12,marginBottom:8,cursor:"pointer",background:f.metodo===m.id?`rgba(255,46,158,0.08)`:bgE,border:`1px solid ${f.metodo===m.id?mg+"66":"rgba(139,47,214,0.25)"}`,boxShadow:f.metodo===m.id?GM:"none",transition:"all 0.2s" }}>
-
                 <div onClick={()=>u("metodo",m.id)} style={{ width:18,height:18,borderRadius:"50%",border:`2px solid ${f.metodo===m.id?mg:"rgba(255,255,255,0.2)"}`,background:f.metodo===m.id?mg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer" }}>
-
                   {f.metodo===m.id&&<div style={{ width:7,height:7,borderRadius:"50%",background:"#fff" }}/>}
-
                 </div>
-
                 <Truck size={16} color={f.metodo===m.id?mg:txS}/>
-
                 <div style={{ flex:1 }}>
-
                   <span className="ghi" style={{ fontSize:13,fontWeight:600,color:f.metodo===m.id?tx:txS }}>{m.label}</span>
-
                   <p className="ghi" style={{ fontSize:11,color:txS,margin:0 }}>{m.detail}</p>
-
                 </div>
-
                 <span className="ghi" style={{ fontSize:13,fontWeight:700,color:m.pColor }}>{m.price}</span>
-
               </label>
-
             ))}
-
             <div style={{ marginTop:24 }}>
-
               <NeonBtn variant="primary" full disabled={!valid} onClick={()=>onNav("checkout-2")} style={{ padding:"14px",fontSize:15 }}>
-
                 Continuar al pago <ArrowRight size={16}/>
-
               </NeonBtn>
-
             </div>
-
           </div>
-
           {/* Map */}
-
           <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
-
             <h3 className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>RUTA DE ENTREGA</h3>
-
             <div style={{ flex:1,minHeight:280 }}><DeliveryMap/></div>
-
             <div style={{ background:bgC,borderRadius:12,padding:16,border:`1px solid rgba(139,47,214,0.2)` }}>
-
               {[{ l:"Origen",     v:"GameHub CDMX · MX" },{ l:"Destino",    v:f.ciudad||"—" },{ l:"ETA",        v:f.metodo==="sameday"?"Hoy <21h":f.metodo==="express"?"2-3 días":"5-7 días" }].map(({ l, v })=>(
-
                 <div key={l} style={{ display:"flex",justifyContent:"space-between",padding:"5px 0" }}>
-
                   <span className="ghi" style={{ fontSize:11,color:txS }}>{l}</span>
-
                   <span className="ghi" style={{ fontSize:11,color:tx,fontWeight:600 }}>{v}</span>
-
                 </div>
-
               ))}
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 }
 
 /* ── CHECKOUT STEP 1 — SHIPPING (MOBILE) ── */
 
 export function CheckoutShipMobile({ onNav }:{ onNav:(s:string)=>void }) {
-
   const [f, setF] = useState({ nombre:"",apellido:"",email:"",telefono:"",direccion:"",ciudad:"",cp:"",metodo:"standard" });
-
   const u = (k:string,v:string)=>setF(p=>({...p,[k]:v}));
-
   const valid = f.nombre&&f.email&&f.direccion&&f.ciudad&&f.cp;
 
   return (
-
-    <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column" }}>
-
+    <div style={{ background:bg,minHeight:"100%",display:"flex",flexDirection:"column" }}>
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)`,zIndex:20 }}>
-
         <div style={{ marginBottom:14 }}><CheckoutProgress step={1} mobile/></div>
-
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-
           <MapPin size={15} color={mg}/>
-
           <span className="ghr" style={{ fontSize:16,fontWeight:700,color:tx }}>DATOS DE ENVÍO</span>
-
         </div>
-
       </div>
 
-      <div style={{ flex:1,overflowY:"auto",padding:"20px 16px",display:"flex",flexDirection:"column",gap:12 }} className="thin-scroll">
+      <div style={{ flex:1,padding:"20px 16px",display:"flex",flexDirection:"column",gap:12 }}>
 
         <FloatInput label="Nombre completo" value={f.nombre} onChange={v=>u("nombre",v)} required/>
 
@@ -4317,7 +4240,7 @@ export function CheckoutPayDesktop({ onNav, cartItems }:{ onNav:(s:string)=>void
 
   return (
 
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",padding:"40px 60px" }}>
+    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"40px 60px" }} className="thin-scroll">
 
       <div style={{ maxWidth:960,margin:"0 auto" }}>
 
@@ -4609,7 +4532,7 @@ export function CheckoutReviewDesktop({ onNav, cartItems }:{ onNav:(s:string)=>v
 
   return (
 
-    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",padding:"40px 60px" }}>
+    <div style={{ background:bg,minHeight:"calc(100vh - 56px)",maxHeight:"calc(100vh - 56px)",overflowY:"auto",padding:"40px 60px" }} className="thin-scroll">
 
       <div style={{ maxWidth:800,margin:"0 auto" }}>
 
