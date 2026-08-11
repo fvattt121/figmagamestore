@@ -3641,6 +3641,8 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
 
   const [promoApplied, setPromoApplied] = useState(false);
 
+  const [promoError, setPromoError] = useState("");
+
   const { sub, ship, tax, total } = calcTotals(cartItems);
 
   const discount = promoApplied ? sub * 0.1 : 0;
@@ -3805,13 +3807,27 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
 
               <div style={{ display:"flex",gap:8 }}>
 
-                <input value={promo} onChange={e=>setPromo(e.target.value.toUpperCase())} placeholder="Ej: GG2025"
+                <input value={promo} onChange={e=>{setPromo(e.target.value.toUpperCase()); setPromoError("");}} placeholder="Ej: GG2025"
 
                   disabled={promoApplied}
 
-                  style={{ flex:1,background:bgE,border:`1px solid ${promoApplied?"rgba(0,230,118,0.5)":"rgba(139,47,214,0.3)"}`,borderRadius:10,padding:"10px 14px",color:promoApplied?ok:tx,fontSize:14,outline:"none",fontFamily:"'Inter',sans-serif",transition:"all 0.2s" }}/>
+                  style={{ flex:1,background:bgE,border:`1px solid ${promoError?"#FF4500":promoApplied?"rgba(0,230,118,0.5)":"rgba(139,47,214,0.3)"}`,borderRadius:10,padding:"10px 14px",color:promoApplied?ok:tx,fontSize:14,outline:"none",fontFamily:"'Inter',sans-serif",transition:"all 0.2s" }}/>
 
-                <button onClick={()=>{if(promo.trim().length>0)setPromoApplied(true);}} disabled={promoApplied}
+                <button onClick={()=>{
+
+                  if (promo.trim() === "GG2025") {
+
+                    setPromoApplied(true);
+
+                    setPromoError("");
+
+                  } else {
+
+                    setPromoError("Código promocional inválido");
+
+                  }
+
+                }} disabled={promoApplied}
 
                   style={{ padding:"10px 16px",borderRadius:10,background:promoApplied?`rgba(0,230,118,0.1)`:bgE,border:`1px solid ${promoApplied?ok+"44":"rgba(139,47,214,0.3)"}`,color:promoApplied?ok:txS,cursor:promoApplied?"default":"pointer",fontSize:13,fontWeight:700,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
 
@@ -3821,7 +3837,9 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
 
               </div>
 
-              {promoApplied&&<p className="ghi" style={{ fontSize:12,color:ok,marginTop:7,fontWeight:600 }}>✓ Descuento 10% aplicado (GG2025)</p>}
+              {promoApplied&&<p className="ghi" style={{ fontSize:12,color:ok,marginTop:7,fontWeight:600 }}>✓ Descuento 10% aplicado ({promo})</p>}
+
+              {promoError&&<p className="ghi" style={{ fontSize:12,color:"#FF4500",marginTop:7,fontWeight:600 }}>✗ {promoError}</p>}
 
             </div>
 
