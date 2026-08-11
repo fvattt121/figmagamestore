@@ -106,7 +106,7 @@ export function AdminSidebar({ active, onNav }:{ active:string; onNav:(s:string)
         })}
       </div>
       <div style={{ width:36,height:1,background:`rgba(139,47,214,0.3)`,marginBottom:8 }}/>
-      <button title="Configuración" style={{ width:44,height:44,borderRadius:10,background:"transparent",border:"none",cursor:"pointer",color:txS,display:"flex",alignItems:"center",justifyContent:"center" }}><Settings size={18}/></button>
+      <button title="Configuración" onClick={()=>onNav("accessibility")} style={{ width:44,height:44,borderRadius:10,background:"transparent",border:"none",cursor:"pointer",color:txS,display:"flex",alignItems:"center",justifyContent:"center" }}><Settings size={18}/></button>
       <button title="Perfil admin" style={{ width:36,height:36,borderRadius:"50%",background:`linear-gradient(135deg,${vi},${mg})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",marginTop:6 }}><User size={14} color="#fff"/></button>
     </div>
   );

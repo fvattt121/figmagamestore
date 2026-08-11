@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Laptop, Smartphone, LogIn, Wifi, Battery } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Laptop, Smartphone, LogIn, Wifi, Battery, Menu, X, ChevronDown, Eye } from "lucide-react";
 import {
-  GH_CSS, bg, bgC, bgE, mg, vi, cy, ok, tx, txS, GM,
+  GH_CSS, bg, bgC, bgE, mg, vi, cy, ok, tx, txS, GM, GC,
   CartItemType, CART_INIT,
   BottomNav, SearchOverlay,
   HomeDesktop, HomeMobile,
@@ -13,7 +13,7 @@ import {
   CheckoutPayDesktop, CheckoutPayMobile,
   CheckoutReviewDesktop, CheckoutReviewMobile,
   ConfirmDesktop, ConfirmMobile,
-  Product, GHLogo,
+  Product, GHLogo, NeonBtn,
 } from "./shared";
 import {
   AdminDashboardDesktop, AdminDashboardMobile,
@@ -25,17 +25,18 @@ import {
   ChatDesktop, ChatMobile,
   ProfileDesktop, ProfileMobile,
   AccessibilityDesktop, AccessibilityMobile,
+  LsmDesktop, LsmMobile,
 } from "./UserScreens";
 import { AuthDesktop, AuthMobile, AuthRole } from "./AuthScreens";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 
 const CHECKOUT_SCREENS = ["checkout-1","checkout-2","checkout-3"];
 
-function PhoneFrame({ children, activeNav="home", onNav, screen }:{
+function PhoneFrame({ children, activeNav="home", onNav, screen, hideBottomNav=false }:{
   children:React.ReactNode; activeNav?:string;
-  onNav:(s:string)=>void; screen:string;
+  onNav:(s:string)=>void; screen:string; hideBottomNav?:boolean;
 }) {
-  const showBottomNav = !CHECKOUT_SCREENS.includes(screen) && screen!=="search";
+  const showBottomNav = !hideBottomNav && !CHECKOUT_SCREENS.includes(screen) && screen!=="search";
 
   return (
     <div style={{ display:"flex",justifyContent:"center",padding:"24px 0 48px",background:bg,minHeight:"calc(100vh - 56px)" }}>
@@ -48,6 +49,19 @@ function PhoneFrame({ children, activeNav="home", onNav, screen }:{
         {/* Status bar */}
         <div style={{ height:44,background:"#060010",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",flexShrink:0,position:"relative" }}>
           <span style={{ color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif" }}>9:41</span>
+          {/* 3 product thumbnails - enlarged for premium UI */}
+         <div style={{ display:"grid", gridTemplateColumns:"80px repeat(3,1fr)", gap:12, borderTop:`1px solid rgba(139,47,214,0.15)` }}>
+           <div style={{ padding:"12px 14px", display:"flex", alignItems:"center" }}>
+             <span className="ghi" style={{ fontSize:12, color:txS, letterSpacing:"0.05em", fontWeight:600 }}>PRODUCTO</span>
+           </div>
+           {/* Placeholder for logic content omitted from prompt */}
+           {Array.from({ length: 3 }).map((_, i) => (
+             <div key={i} style={{ padding:"14px 8px", borderLeft:`1px solid rgba(139,47,214,0.15)`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8, background:"rgba(139,47,214,0.05)", cursor:"pointer" }}>
+               <Plus size={24} color={txS}/>
+               <span className="ghi" style={{ fontSize:12, color:txS, fontWeight:600 }}>Añadir</span>
+             </div>
+           ))}
+         </div>
           <div style={{ position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:120,height:32,background:"#060010",borderRadius:"0 0 18px 18px" }}/>
           <div style={{ display:"flex",gap:5,alignItems:"center" }}>
             <Wifi size={12} color="#fff"/>
@@ -69,7 +83,7 @@ function PhoneFrame({ children, activeNav="home", onNav, screen }:{
   );
 }
 
-type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility";
+type Screen = "home"|"catalog"|"detail"|"search"|"compare"|"cart"|"checkout-1"|"checkout-2"|"checkout-3"|"confirmation"|"admin-dashboard"|"admin-catalog"|"admin-logistics"|"profile"|"support"|"chat"|"accessibility"|"lsm";
 
 const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
   { id:"home",             label:"Home",          group:0 },
@@ -89,6 +103,7 @@ const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
   { id:"support",          label:"Soporte",       group:3 },
   { id:"chat",             label:"GameBot",       group:3 },
   { id:"accessibility",    label:"Accesibilidad", group:3 },
+  { id:"lsm",              label:"Traductor LSM", group:3 },
 ];
 
 export default function App() {
@@ -97,99 +112,447 @@ export default function App() {
   const [isMobile,   setIsMobile]   = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartItems,  setCartItems]  = useState<CartItemType[]>(CART_INIT);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [modalType,    setModalType]    = useState<"terms" | "privacy" | null>(null);
+  const [modalMode,    setModalMode]    = useState<"legal" | "gamer">("gamer");
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [modalChecked, setModalChecked] = useState(false);
+  const [notifications, setNotifications] = useState<{ id: number; title: string; desc: string; date: string; actionLabel?: string; targetScreen?: string }[]>([
+    { id: 1, title: "🎁 ¡Gamer Starter Pack!", desc: "Reclama tus 100 XP iniciales en tu perfil.", date: "Hace 2 min", actionLabel: "Ir a Perfil", targetScreen: "profile" },
+    { id: 2, title: "🔥 Nuevos visores VR", desc: "El stock de ProVision VR X2 ha sido renovado.", date: "Hace 5 min", actionLabel: "Ver Catálogo", targetScreen: "catalog" }
+  ]);
+  // UI state for notifications panel
+  const [notifOpen, setNotifOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const nav = (s:string) => { setSearchOpen(false); setScreen(s as Screen); };
+  useEffect(() => {
+    setScrolledToBottom(false);
+    setModalChecked(false);
+    setModalMode("gamer");
+  }, [modalType]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (el) {
+      const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+      if (isAtBottom) {
+        setScrolledToBottom(true);
+      }
+    }
+  };
+
+  // Responsive layout auto-detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Expose notifications globally
+  useEffect(() => {
+    (window as any).getNotifications = () => notifications;
+    (window as any).addNotification = (title: string, desc: string, actionLabel?: string, targetScreen?: string) => {
+      setNotifications(prev => [
+        { id: Date.now(), title, desc, date: "Ahora mismo", actionLabel, targetScreen },
+        ...prev
+      ]);
+    };
+    (window as any).navigateToScreen = (s: string) => {
+      nav(s);
+    };
+    return () => {
+      delete (window as any).getNotifications;
+      delete (window as any).addNotification;
+      delete (window as any).navigateToScreen;
+    };
+  }, [notifications]);
+
+  // Global Add to Cart handler
+  useEffect(() => {
+    (window as any).addToCart = (p: Product) => {
+      setCartItems(prev => {
+        const existing = prev.find(item => item.id === p.id);
+        if (existing) {
+          return prev.map(item => item.id === p.id ? { ...item, qty: item.qty + 1 } : item);
+        }
+        return [...prev, { ...p, qty: 1, variant: p.variants[0] || "Estándar", stock: "ok", stockCount: 10 }];
+      });
+      toast.success(`${p.name} añadido al carrito`, { duration: 1800, position: "bottom-right" });
+    };
+    (window as any).openTerms = () => setModalType("terms");
+    (window as any).openPrivacy = () => setModalType("privacy");
+    return () => {
+      delete (window as any).addToCart;
+      delete (window as any).openTerms;
+      delete (window as any).openPrivacy;
+    };
+  }, []);
+
+  const nav = (s:string) => {
+    setSearchOpen(false);
+    setScreen(s as Screen);
+    if (s === "confirmation") {
+      const orderNum = Math.floor(Math.random() * 90000) + 10000;
+      setNotifications(prev => [
+        {
+          id: Date.now(),
+          title: "🛒 ¡Compra Completada!",
+          desc: `Tu orden de hardware #${orderNum} está lista. Revisa el estado de entrega en tu mapa.`,
+          date: "Ahora mismo",
+          actionLabel: "Ver Pedidos",
+          targetScreen: "profile"
+        },
+        ...prev
+      ]);
+      toast.success("¡Compra completada con éxito!", { position: "bottom-right" });
+    }
+  };
   const login  = (r:"user"|"admin") => { setRole(r); setScreen(r==="admin"?"admin-dashboard":"home"); };
-  const logout = () => setRole("guest");
+  const logout = () => { setRole("guest"); setMenuOpen(false); };
 
   const openDetail = (_p: Product) => { setScreen("detail"); };
 
-  const MobileWrapper = ({ children }: { children: React.ReactNode }) => (
-    <PhoneFrame activeNav={screen} onNav={nav} screen={screen}>{children}</PhoneFrame>
-  );
+  // Fluid responsive container for mobile viewports (no forced mock phone frame)
+  const MobileWrapper = ({ children }: { children: React.ReactNode }) => {
+    const showBottomNav = !CHECKOUT_SCREENS.includes(screen) && screen !== "search";
+    return (
+      <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, overflowY: "auto" }}>{children}</div>
+        {showBottomNav && <BottomNav active={screen} onNav={nav} />}
+      </div>
+    );
+  };
 
-  const MobileToggle = () => (
-    <div style={{ display:"flex",background:bgE,borderRadius:50,padding:3,border:`1px solid rgba(139,47,214,0.3)`,flexShrink:0 }}>
-      {[{m:false,Icon:Laptop,l:"Web"},{m:true,Icon:Smartphone,l:"Móvil"}].map(({ m,Icon,l })=>(
-        <button key={l} onClick={()=>setIsMobile(m)} style={{ padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:600,cursor:"pointer",background:isMobile===m?`linear-gradient(135deg,${mg},${vi})`:"transparent",border:"none",color:isMobile===m?"#fff":txS,display:"flex",alignItems:"center",gap:4,boxShadow:isMobile===m?GM:"none",fontFamily:"'Inter',sans-serif",transition:"all 0.2s" }}>
-          <Icon size={11}/>{l}
-        </button>
-      ))}
-    </div>
-  );
+  const renderLegalModal = () => {
+    if (!modalType) return null;
+
+    const isTerms = modalType === "terms";
+    const title = isTerms ? "Contrato Gamer: Términos y Condiciones" : "Contrato Gamer: Política de Privacidad";
+
+    return (
+      <div style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(6, 0, 16, 0.85)",
+        backdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 2000,
+        padding: 20,
+      }}>
+        <div style={{
+          background: bgC,
+          border: `1px solid rgba(139, 47, 214, 0.3)`,
+          borderRadius: 20,
+          width: "100%",
+          maxWidth: 600,
+          maxHeight: "85vh",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: `0 20px 50px rgba(0, 0, 0, 0.8)`,
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: "20px 24px",
+            borderBottom: "1px solid rgba(139, 47, 214, 0.2)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#FFF",
+              fontFamily: "'Rajdhani', sans-serif",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}>
+              {title}
+            </h3>
+            <button
+              onClick={() => setModalType(null)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: txS,
+                cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Scrollable Content */}
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            style={{
+              padding: 24,
+              overflowY: "auto",
+              flex: 1,
+              color: tx,
+              fontSize: 14,
+              lineHeight: 1.6,
+              fontFamily: "'Inter', sans-serif",
+            }}
+            className="thin-scroll"
+          >
+            {isTerms ? (
+              <>
+                <h4 style={{ color: mg, marginTop: 0, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>1. REGLAS DE LA PARTIDA (Aceptación)</h4>
+                <p>Al entrar al lobby de GameHub Store, aceptas seguir las normas de juego limpio. No se permiten hacks, exploits ni comportamientos tóxicos. Al navegar, confirmas que aceptas jugar bajo estas condiciones.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>2. TU LOOT Y LICENCIA (Uso del sitio)</h4>
+                <p>Te otorgamos una licencia limitada (como un skin temporal de arma) para explorar e interactuar con nuestro sitio para uso personal. No puedes duplicar, revender ni reclamar propiedad del código o del inventario.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>3. PERFIL DE JUGADOR (Tu cuenta)</h4>
+                <p>Protege tu contraseña como si fuera tu barra de vida en un Boss Fight. Eres el único responsable de lo que ocurra con tu perfil. Si compartes tus datos de acceso y pierdes tu loot o tu cuenta es penalizada, no podemos revivirte.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>4. SIN RESPAWN POR LAG (Responsabilidad)</h4>
+                <p>No somos responsables si tu PC experimenta sobrecalentamiento, si pierdes la conexión durante una compra o si tu setup explota por falta de mantenimiento. GameHub funciona en la nube pero no hace milagros.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>5. LA TIENDA DE ITEMS (Precios y Stock)</h4>
+                <p>Los precios del hardware y periféricos fluctúan según la economía global de la industria. Nos reservamos el derecho de modificar el inventario y las ofertas sin previo aviso.</p>
+              </>
+            ) : (
+              <>
+                <h4 style={{ color: mg, marginTop: 0, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>1. ESCANEO DE GREMIO (Datos recolectados)</h4>
+                <p>Solo guardamos información útil para completar tu misión de compra: tu gamer tag, email para mandarte el recibo, y la dirección física para que los repartidores de la party no se pierdan en el mapa.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>2. OPTIMIZAR TU BUILD (Uso de datos)</h4>
+                <p>Usamos tus preferencias de juego para recomendarte el hardware perfecto para subir de nivel y configurar promociones exclusivas para tu build o setup específico.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>3. PARTY PRIVADA (Terceros)</h4>
+                <p>No vendemos tus datos a gremios enemigos ni a spammers de publicidad. Solo los compartimos con nuestros aliados indispensables (procesadores de pago seguros y paqueterías) para finalizar la entrega de tu loot.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>4. SHIELD DE NIVEL LEGENDARIO (Seguridad)</h4>
+                <p>Tus datos están protegidos por encriptación avanzada equivalente a un escudo de nivel legendario. Ningún hacker novato podrá traspasar nuestras defensas cibernéticas y muros de fuego.</p>
+
+                <h4 style={{ color: mg, fontFamily: "'Rajdhani', sans-serif", fontSize: 16 }}>5. RESET DE PERSONAJE (Derechos)</h4>
+                <p>Tienes el control total de tu personaje. Si decides hacer un reset completo y borrar tu cuenta y todo tu historial de datos de nuestros servidores, puedes pedírnoslo a través de soporte técnico.</p>
+              </>
+            )}
+            <div style={{ height: 20 }} />
+          </div>
+
+          {/* Footer */}
+          <div style={{
+            padding: "20px 24px",
+            borderTop: "1px solid rgba(139, 47, 214, 0.2)",
+            display: "flex",
+            justifyContent: "flex-end",
+            background: "rgba(10, 5, 18, 0.5)",
+          }}>
+            <button
+              onClick={() => setModalType(null)}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 10,
+                background: `linear-gradient(135deg, ${mg}, ${vi})`,
+                border: "none",
+                color: "#FFF",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: GM,
+                transition: "all 0.2s",
+              }}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   /* ── Auth gate: guest → fullscreen auth, no nav ── */
   if (role === "guest") {
     return (
       <div style={{ background:bg,minHeight:"100vh" }}>
         <style>{GH_CSS}</style>
-        <div style={{ position:"fixed",top:14,right:14,zIndex:300 }}>
-          <MobileToggle/>
-        </div>
+        <Toaster theme="dark" position="bottom-right" toastOptions={{ style:{ background:"#150A24",border:"1px solid rgba(255,46,158,0.35)",color:"#F0E6FF" } }}/>
         {!isMobile ? (
           <AuthDesktop onLogin={login}/>
         ) : (
-          <div style={{ display:"flex",justifyContent:"center",alignItems:"center",minHeight:"100vh",padding:"20px 16px",background:bg }}>
-            <PhoneFrame activeNav={"home" as Screen} onNav={nav} screen={"home" as Screen}>
-              <AuthMobile onLogin={login}/>
-            </PhoneFrame>
-          </div>
+          <AuthMobile onLogin={login}/>
         )}
+        {renderLegalModal()}
       </div>
     );
   }
 
-  /* ── All tabs always visible in prototype ── */
-  const visibleTabs = SCREEN_TABS;
+  const HIDDEN_NAV_SCREENS = ["checkout-1", "checkout-2", "checkout-3", "confirmation", "detail", "search", "lsm"];
+  const visibleTabs = SCREEN_TABS.filter(t => !HIDDEN_NAV_SCREENS.includes(t.id));
 
-  const DIVIDER_LABELS: Record<number,{color:string;label:string}> = {
-    1: { color:vi,     label:"COMPRA"  },
-    2: { color:"#FF4500", label:"ADMIN"  },
-    3: { color:cy,     label:"USUARIO" },
-  };
+  const groups = [
+    { name: "Tienda", group: 0, color: mg },
+    { name: "Compra", group: 1, color: vi },
+    { name: "Admin", group: 2, color: "#FF4500", adminOnly: true },
+    { name: "Usuario", group: 3, color: cy },
+  ];
 
   return (
-    <div style={{ background:bg, minHeight:"100vh" }}>
+    <div style={{ background:bg, minHeight:"100vh", position:"relative" }}>
       <style>{GH_CSS}</style>
       <Toaster theme="dark" position="bottom-right" toastOptions={{ style:{ background:"#150A24",border:"1px solid rgba(255,46,158,0.35)",color:"#F0E6FF" } }}/>
 
-      {/* ─── Top navigation ─── */}
+      {/* ─── Top navigation (desktop only) ─── */}
+      {!isMobile && (
       <div style={{ position:"sticky",top:0,zIndex:200,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",borderBottom:`1px solid rgba(139,47,214,0.25)`,height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:2,overflowX:"auto",flex:1 }} className="no-scroll">
-          <div style={{ marginRight:12,flexShrink:0,cursor:"pointer" }} onClick={()=>nav(role==="admin"?"admin-dashboard":"home")}>
+        <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+          <div style={{ cursor:"pointer" }} onClick={()=>nav(role==="admin"?"admin-dashboard":"home")}>
             <GHLogo scale={0.65} />
           </div>
-          {visibleTabs.map((t,i)=>{
-            const prevGroup = i>0?visibleTabs[i-1].group:t.group;
-            const newGroup  = i>0 && t.group!==prevGroup;
-            const div       = newGroup ? DIVIDER_LABELS[t.group] : null;
-            return (
-              <span key={t.id} style={{ display:"flex",alignItems:"center" }}>
-                {div&&<div style={{ display:"flex",alignItems:"center",gap:4,flexShrink:0,margin:"0 2px" }}><div style={{ width:1,height:18,background:"rgba(139,47,214,0.45)" }}/><span className="ghi" style={{ fontSize:8,fontWeight:800,color:div.color,letterSpacing:"0.1em",opacity:0.8 }}>{div.label}</span></div>}
-                <button onClick={()=>nav(t.id)} style={{ padding:"5px 11px",borderRadius:8,fontSize:12,fontWeight:600,cursor:"pointer",background:screen===t.id?"rgba(255,46,158,0.14)":"transparent",border:`1px solid ${screen===t.id?mg+"55":"transparent"}`,color:screen===t.id?mg:txS,boxShadow:screen===t.id?GM:"none",transition:"all 0.2s",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap",flexShrink:0 }}>{t.label}</button>
-              </span>
-            );
-          })}
         </div>
-        <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0,marginLeft:8 }}>
-          {/* Role badge */}
-          <div style={{ display:"flex",alignItems:"center",gap:5,padding:"4px 10px",borderRadius:6,background:role==="admin"?"rgba(255,69,0,0.12)":"rgba(0,230,118,0.08)",border:`1px solid ${role==="admin"?"rgba(255,69,0,0.35)":"rgba(0,230,118,0.3)"}` }}>
-            <div style={{ width:6,height:6,borderRadius:"50%",background:role==="admin"?"#FF4500":ok,boxShadow:`0 0 5px ${role==="admin"?"#FF4500":ok}` }}/>
-            <span className="ghi" style={{ fontSize:10,fontWeight:700,color:role==="admin"?"#FF6533":ok,letterSpacing:"0.06em" }}>{role==="admin"?"ADMIN":"USER"}</span>
+
+        {/* Grouped dropdowns for Desktop */}
+        {!isMobile && (
+          <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+            {groups.map(g => {
+              if (g.adminOnly && role !== "admin") return null;
+              const gItems = visibleTabs.filter(t => t.group === g.group);
+              const isActive = gItems.some(t => t.id === screen);
+              return (
+                <div key={g.name}
+                  onMouseEnter={() => setOpenDropdown(g.name)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                  style={{ position:"relative", padding:"12px 0" }}>
+                  <button style={{
+                    display:"flex", alignItems:"center", gap:4, background:"transparent", border:"none",
+                    color: isActive ? g.color : txS, fontSize:12, fontWeight:700, cursor:"pointer",
+                    fontFamily:"'Inter',sans-serif", letterSpacing:"0.06em", transition:"all 0.2s"
+                  }}>
+                    {g.name.toUpperCase()} <ChevronDown size={12}/>
+                  </button>
+                  {openDropdown === g.name && (
+                    <div style={{
+                      position:"absolute", top:"100%", left:0, background:bgC, borderRadius:12,
+                      border:`1px solid rgba(139,47,214,0.3)`, padding:"6px", minWidth:160,
+                      display:"flex", flexDirection:"column", gap:2, boxShadow:`0 10px 30px rgba(0,0,0,0.6)`,
+                      zIndex:300
+                    }}>
+                      {gItems.map(t => (
+                        <button key={t.id} onClick={() => nav(t.id)} style={{
+                          padding:"8px 12px", borderRadius:6, fontSize:12, fontWeight:600,
+                          textAlign:"left", cursor:"pointer", border:"none", width:"100%",
+                          background: screen === t.id ? "rgba(255,46,158,0.12)" : "transparent",
+                          color: screen === t.id ? mg : tx, transition: "all 0.15s",
+                          fontFamily:"'Inter',sans-serif"
+                        }}
+                        onMouseEnter={e => {
+                          if (screen !== t.id) e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                        }}
+                        onMouseLeave={e => {
+                          if (screen !== t.id) e.currentTarget.style.background = "transparent";
+                        }}>
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          {/* Logout */}
-          <button onClick={logout} style={{ padding:"5px 10px",borderRadius:7,background:"transparent",border:`1px solid rgba(139,47,214,0.3)`,color:txS,fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4,transition:"all 0.15s" }}
-            onMouseEnter={e=>(e.currentTarget.style.borderColor=mg+"55")} onMouseLeave={e=>(e.currentTarget.style.borderColor="rgba(139,47,214,0.3)")}>
-            <LogIn size={11} style={{ transform:"scaleX(-1)" }}/>Salir
-          </button>
-          <MobileToggle/>
+        )}
+
+        <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0 }}>
+           {/* Notification Bell (desktop) */}
+           <button onClick={() => setNotifOpen(true)} style={{ background:"none",border:"none",cursor:"pointer",color:tx,marginRight:12,display:"flex",alignItems:"center" }}><Bell size={24}/></button>
+           {/* Logout */}
+           <button onClick={logout} style={{ padding:"5px 10px",borderRadius:7,background:"transparent",border:`1px solid rgba(139,47,214,0.3)`,color:txS,fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4,transition:"all 0.15s" }}
+             onMouseEnter={e=>(e.currentTarget.style.borderColor=mg+"55")} onMouseLeave={e=>(e.currentTarget.style.borderColor="rgba(139,47,214,0.3)")}
+           >
+             <LogIn size={11} style={{ transform:"scaleX(-1)" }}/>
+Salir
+           </button>
         </div>
       </div>
+      )}
 
-      {/* ─── Screen content ─── */}
-      <div style={{ position:"relative" }}>
-        {screen==="home"&&!isMobile&&<HomeDesktop onNav={nav} onSearch={()=>setSearchOpen(true)}/>}
-        {screen==="home"&&isMobile&&(<MobileWrapper><HomeMobile onNav={nav} onSearch={()=>setSearchOpen(true)}/>{searchOpen&&<SearchOverlay onClose={()=>setSearchOpen(false)} mobile/>}</MobileWrapper>)}
+      {/* Mobile Header */}
+      {isMobile && (
+        <div style={{ position:"sticky",top:0,zIndex:200,background:"rgba(21,10,36,0.97)",backdropFilter:"blur(14px)",height:56,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px" }}>
+           <button onClick={() => setMenuOpen(true)} style={{ background:"none", border:"none", cursor:"pointer", color:tx, display:"flex", alignItems:"center" }}>
+             <Menu size={24} />
+           </button>
+           <GHLogo scale={0.65} />
+           <button onClick={() => setNotifOpen(true)} style={{ background:"none", border:"none", cursor:"pointer", color:tx }}>
+             <Bell size={24} />
+           </button>
+        </div>
+      )}
+
+      {/* ─── Mobile Hamburger Menu Drawer ─── */}
+      {isMobile && menuOpen && (
+        <div style={{ position:"fixed", inset:0, zIndex:300, display:"flex" }}>
+          <div onClick={()=>setMenuOpen(false)} style={{ position:"absolute", inset:0, background:"rgba(6,0,16,0.85)", backdropFilter:"blur(8px)" }}/>
+          <div className="slide-r" style={{ position:"relative", width:280, height:"100%", background:bgC, borderRight:`1px solid rgba(139,47,214,0.3)`, padding:"24px 20px", display:"flex", flexDirection:"column", gap:20, zIndex:1 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <GHLogo scale={0.65} />
+              <button onClick={()=>setMenuOpen(false)} style={{ background:"none", border:"none", cursor:"pointer", color:txS }}>
+                <X size={20}/>
+              </button>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8 }} className="thin-scroll">
+              {groups.map(g => {
+                if (g.adminOnly && role !== "admin") return null;
+                const gItems = visibleTabs.filter(t => t.group === g.group);
+                return (
+                  <div key={g.name} style={{ display:"flex", flexDirection:"column", gap:4, marginTop:10 }}>
+                    <span className="ghi" style={{ fontSize:10, fontWeight:800, color:g.color, letterSpacing:"0.1em", paddingLeft:10 }}>{g.name.toUpperCase()}</span>
+                    {gItems.map(t => (
+                      <button key={t.id} onClick={()=>{ nav(t.id); setMenuOpen(false); }} style={{
+                        padding:"10px 14px", borderRadius:8, fontSize:13, fontWeight:600,
+                        textAlign:"left", cursor:"pointer", border:"none", width:"100%",
+                        background: screen === t.id ? "rgba(255,46,158,0.12)" : "transparent",
+                        color: screen === t.id ? mg : tx, transition: "all 0.2s",
+                        fontFamily:"'Inter',sans-serif"
+                      }}>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+       {/* ─── Screen content ─── */}
+       <div style={{ position:"relative" }}>
+         {screen==="home"&&!isMobile&&<HomeDesktop onNav={nav} onSearch={()=>setSearchOpen(true)}/>}
+         {screen==="home"&&isMobile&&(<MobileWrapper><HomeMobile onNav={nav} onSearch={()=>setSearchOpen(true)}/>{searchOpen&&<SearchOverlay onClose={()=>setSearchOpen(false)} mobile/>}</MobileWrapper>)}
+         {/* Notification Panel */}
+         {notifOpen && (
+           <div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", justifyContent:"flex-end" }}>
+             <div onClick={() => setNotifOpen(false)} style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.5)" }}/>
+             <div style={{ width:300, height:"100%", background:bgC, padding:20, overflowY:"auto", boxShadow:`-4px 0 12px rgba(0,0,0,0.4)` }}>
+               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}><span style={{ fontSize:18, fontWeight:600, color:tx }}>Notificaciones</span><button onClick={() => setNotifOpen(false)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><X size={20}/></button></div>
+               {notifications.length===0 ? (<div style={{ color:txS, fontSize:14 }}>No hay notificaciones</div>) : (notifications.map(n=> (
+                 <div key={n.id} style={{ marginBottom:12, padding:12, background:mg, borderRadius:8, color:tx }}>
+                   <div style={{ fontWeight:600, marginBottom:4 }}>{n.title}</div>
+                   <div style={{ fontSize:12 }}>{n.desc}</div>
+                   <div style={{ fontSize:10, opacity:0.8, marginTop:4 }}>{n.date}</div>
+                 </div>
+               )))}
+             </div>
+           </div>
+         )}
 
         {screen==="catalog"&&!isMobile&&<CatalogDesktop onNav={nav} onSearch={()=>setSearchOpen(true)} onDetail={openDetail}/>}
         {screen==="catalog"&&isMobile&&(<MobileWrapper><CatalogMobile onNav={nav} onSearch={()=>setSearchOpen(true)} onDetail={openDetail}/>{searchOpen&&<SearchOverlay onClose={()=>setSearchOpen(false)} mobile/>}</MobileWrapper>)}
@@ -238,6 +601,9 @@ export default function App() {
 
         {screen==="accessibility"&&!isMobile&&<AccessibilityDesktop onNav={nav}/>}
         {screen==="accessibility"&&isMobile&&(<MobileWrapper><AccessibilityMobile onNav={nav}/></MobileWrapper>)}
+
+        {screen==="lsm"&&!isMobile&&<LsmDesktop onNav={nav}/>}
+        {screen==="lsm"&&isMobile&&(<MobileWrapper><LsmMobile onNav={nav}/></MobileWrapper>)}
       </div>
 
       {/* ─── Global search overlay (desktop) — works from any screen ─── */}
@@ -246,6 +612,44 @@ export default function App() {
           <SearchOverlay onClose={()=>setSearchOpen(false)}/>
         </div>
       )}
+
+      {/* ─── Premium Accessibility Floating Action Button ─── */}
+      {screen !== "accessibility" && (
+        <button
+          onClick={() => nav("accessibility")}
+          title="Accesibilidad"
+          className="neon-btn-cy"
+          style={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            background: `linear-gradient(135deg, ${cy}, ${vi})`,
+            border: "none",
+            cursor: "pointer",
+            color: "#0A0512",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: GC,
+            zIndex: 1000,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = "scale(1.1)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          <Eye size={22} />
+        </button>
+      )}
+
+      {/* ─── Custom Premium Legal Document Modal Overlay ─── */}
+      {renderLegalModal()}
     </div>
   );
 }

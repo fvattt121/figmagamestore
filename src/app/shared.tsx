@@ -526,7 +526,14 @@ export function ProductCard({ p, onClick }:{ p:Product; onClick?:()=>void }) {
         <Stars value={p.rating} count={p.reviews} size={11}/>
         <div style={{ marginTop:10, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:6 }}>
           <PriceTag price={p.price} orig={p.orig}/>
-          <button onClick={e=>{e.stopPropagation();toast.success(`${p.name} añadido al carrito`,{duration:1800,position:"bottom-right"});}} style={{
+          <button onClick={e=>{
+            e.stopPropagation();
+            if ((window as any).addToCart) {
+              (window as any).addToCart(p);
+            } else {
+              toast.success(`${p.name} añadido al carrito`,{duration:1800,position:"bottom-right"});
+            }
+          }} style={{
             padding:"6px 13px", borderRadius:8, fontSize:12, fontWeight:700,
             background:"transparent", border:`1px solid ${mg}66`, color:mg,
             cursor:"pointer", boxShadow:GM, transition:"all 0.2s",
@@ -638,7 +645,7 @@ export function Sidebar({ activeNav, onNav, onSearch }:{ activeNav:string; onNav
   ];
   return (
     <div style={{
-      width:64, height:"100vh", position:"fixed", left:0, top:56, zIndex:80,
+      width:64, height:"calc(100vh - 56px)", position:"fixed", left:0, top:56, zIndex:80,
       background:bgC, borderRight:`1px solid rgba(139,47,214,0.2)`,
       display:"flex", flexDirection:"column", alignItems:"center", padding:"16px 0",
     }}>
@@ -661,11 +668,6 @@ export function Sidebar({ activeNav, onNav, onSearch }:{ activeNav:string; onNav
           );
         })}
       </div>
-      <button title="Accesibilidad" onClick={()=>onNav("accessibility")} style={{
-        width:44, height:44, borderRadius:10, background:bgE,
-        border:`1px solid rgba(0,240,255,0.3)`, cursor:"pointer", color:cy,
-        display:"flex", alignItems:"center", justifyContent:"center", boxShadow:GC,
-      }}><Eye size={18}/></button>
     </div>
   );
 }
@@ -856,7 +858,34 @@ export function FilterPanel({ onClose, isMobile=false, selected, setSelected, lo
 export function SearchOverlay({ onClose, mobile=false }:{ onClose:()=>void; mobile?:boolean }) {
   const [query,     setQuery]     = useState("");
   const [listening, setListening] = useState(false);
-  const hits = query.length>1?PRODUCTS.filter(p=>p.name.toLowerCase().includes(query.toLowerCase())).slice(0,4):[];
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const hits = query.length > 1 ? PRODUCTS.filter(p => {
+    const q = query.toLowerCase();
+    const brandMap: Record<number, string[]> = {
+      1: ["sony", "playstation", "vr", "provision", "visor", "realidad virtual"],
+      2: ["logitech", "teclado", "keyboard", "mechstrike"],
+      3: ["razer", "control", "controller", "nexforce"],
+      4: ["steelseries", "auriculares", "headset", "soundstrike"],
+      5: ["corsair", "teclado", "keyboard", "ultraswitch"],
+      6: ["razer", "control", "controller", "aerogrip"],
+      7: ["sony", "playstation", "vr", "quantumvr", "visor", "realidad virtual"],
+      8: ["logitech", "auriculares", "headset", "basscore"]
+    };
+    const keywords = brandMap[p.id] || [];
+    const matchesBrand = keywords.some(keyword => keyword.includes(q) || q.includes(keyword));
+    const matchesName = p.name.toLowerCase().includes(q);
+    const matchesSub = p.sub.toLowerCase().includes(q);
+    const matchesCat = p.cat.toLowerCase().includes(q);
+    return matchesName || matchesSub || matchesCat || matchesBrand;
+  }).slice(0, 4) : [];
   if (mobile) {
     return (
       <div className="fade-in" style={{ position:"absolute",inset:0,background:bg,zIndex:50,display:"flex",flexDirection:"column" }}>
@@ -1142,9 +1171,33 @@ export function HomeDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onSear
             <input onFocus={onSearch} readOnly placeholder="Buscar hardware gaming…"
               style={{ width:"100%",background:bgE,border:`1px solid rgba(255,46,158,0.2)`,borderRadius:50,padding:"9px 16px 9px 40px",color:txS,fontSize:13,outline:"none",cursor:"pointer",fontFamily:"'Inter',sans-serif" }}/>
           </div>
-          <button onClick={()=>toast("🔔 No tienes notificaciones nuevas",{description:"Estás al día con todas tus alertas."})} title="Notificaciones" style={{ position:"relative",background:"none",border:"none",cursor:"pointer",color:txS,transition:"color 0.15s" }}
+          <button onClick={() => {
+            const list = (window as any).getNotifications ? (window as any).getNotifications() : [];
+            if (list.length === 0) {
+              toast("🔔 No tienes notificaciones nuevas", { description: "Estás al día con todas tus alertas." });
+            } else {
+              list.forEach((n: any, idx: number) => {
+                setTimeout(() => {
+                  toast(`🔔 ${n.title}`, {
+                    description: `${n.desc} (${n.date})`,
+                    action: n.targetScreen && n.actionLabel ? {
+                      label: n.actionLabel,
+                      onClick: () => {
+                        if ((window as any).navigateToScreen) {
+                          (window as any).navigateToScreen(n.targetScreen);
+                        }
+                      }
+                    } : undefined
+                  });
+                }, idx * 150);
+              });
+            }
+          }} title="Notificaciones" style={{ position:"relative",background:"none",border:"none",cursor:"pointer",color:txS,transition:"color 0.15s" }}
             onMouseEnter={e=>(e.currentTarget.style.color=mg)} onMouseLeave={e=>(e.currentTarget.style.color=txS)}>
-            <Bell size={20}/><span style={{ position:"absolute",top:-2,right:-2,width:8,height:8,borderRadius:"50%",background:mg,animation:"stockPulse 2s infinite" }}/>
+            <Bell size={20}/>
+            {((window as any).getNotifications ? (window as any).getNotifications().length > 0 : true) && (
+              <span style={{ position:"absolute",top:-2,right:-2,width:8,height:8,borderRadius:"50%",background:mg,animation:"stockPulse 2s infinite" }}/>
+            )}
           </button>
           <button onClick={()=>onNav("profile")} title="Mi perfil" style={{ width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${mg},${vi})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}><User size={14} color="#fff"/></button>
         </div>
@@ -1231,9 +1284,37 @@ export function HomeMobile({ onNav, onSearch }:{ onNav:(s:string)=>void; onSearc
                 <Icon size={18}/><span className="ghi" style={{ fontSize:14,fontWeight:500 }}>{label}</span>
               </button>
             ))}
-            <button onClick={()=>{toast("🔔 No tienes notificaciones nuevas",{description:"Estás al día con todas tus alertas."});setDrawerOpen(false);}}
+            <button onClick={() => {
+              const list = (window as any).getNotifications ? (window as any).getNotifications() : [];
+              if (list.length === 0) {
+                toast("🔔 No tienes notificaciones nuevas", { description: "Estás al día con todas tus alertas." });
+              } else {
+                list.forEach((n: any, idx: number) => {
+                  setTimeout(() => {
+                    toast(`🔔 ${n.title}`, {
+                      description: `${n.desc} (${n.date})`,
+                      action: n.targetScreen && n.actionLabel ? {
+                        label: n.actionLabel,
+                        onClick: () => {
+                          if ((window as any).navigateToScreen) {
+                            (window as any).navigateToScreen(n.targetScreen);
+                          }
+                        }
+                      } : undefined
+                    });
+                  }, idx * 150);
+                });
+              }
+              setDrawerOpen(false);
+            }}
               style={{ display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 0",background:"none",border:"none",cursor:"pointer",color:txS,borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
-              <Bell size={18}/><span className="ghi" style={{ fontSize:14,fontWeight:500 }}>Notificaciones</span>
+              <div style={{ position:"relative" }}>
+                <Bell size={18}/>
+                {((window as any).getNotifications ? (window as any).getNotifications().length > 0 : true) && (
+                  <span style={{ position:"absolute",top:-1,right:-1,width:6,height:6,borderRadius:"50%",background:mg }}/>
+                )}
+              </div>
+              <span className="ghi" style={{ fontSize:14,fontWeight:500 }}>Notificaciones</span>
             </button>
           </div>
         </div>
@@ -1655,6 +1736,7 @@ export function CompareDesktop({ onNav, onSearch }:{ onNav:(s:string)=>void; onS
 }
 
 export function CatalogMobile({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>void; onSearch:()=>void; onDetail:(p:Product)=>void }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeCat, setActiveCat] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [sort, setSort] = useState("popular");
@@ -1677,6 +1759,7 @@ export function CatalogMobile({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>
     <div style={{ background:bg,height:"100%",display:"flex",flexDirection:"column",position:"relative" }}>
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderBottom:`1px solid rgba(139,47,214,0.2)` }}>
         <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10 }}>
+          <button onClick={()=>setDrawerOpen(true)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Menu size={22}/></button>
           <span className="ghr" style={{ fontSize:18,fontWeight:700,color:tx }}>CATÁLOGO</span>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={onSearch} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><Search size={20}/></button>
@@ -1716,6 +1799,55 @@ export function CatalogMobile({ onNav, onSearch, onDetail }:{ onNav:(s:string)=>
           </div>
         </div>
       )}
+      {drawerOpen&&(
+        <div className="fade-in" style={{ position:"absolute",inset:0,zIndex:50 }}>
+          <div onClick={()=>setDrawerOpen(false)} style={{ position:"absolute",inset:0,background:"rgba(0,0,0,0.75)" }}/>
+          <div className="slide-r" style={{ position:"absolute",left:0,top:0,bottom:0,width:252,background:bgC,borderRight:`1px solid rgba(139,47,214,0.35)`,padding:20 }}>
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24 }}>
+              <GHLogo scale={0.65} />
+              <button onClick={()=>setDrawerOpen(false)} style={{ background:"none",border:"none",cursor:"pointer",color:txS }}><X size={20}/></button>
+            </div>
+            {[{ id:"home",Icon:Home,label:"Inicio" },{ id:"catalog",Icon:Gamepad2,label:"Catálogo" },{ id:"compare",Icon:BarChart2,label:"Comparador" },{ id:"search",Icon:Search,label:"Buscar" },{ id:"cart",Icon:ShoppingCart,label:"Carrito (3)" },{ id:"profile",Icon:User,label:"Mi Perfil" }].map(({ id, Icon, label })=>(
+              <button key={id} onClick={()=>{id==="search"?onSearch():onNav(id);setDrawerOpen(false);}}
+                style={{ display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 0",background:"none",border:"none",cursor:"pointer",color:txS,borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
+                <Icon size={18}/><span className="ghi" style={{ fontSize:14,fontWeight:500 }}>{label}</span>
+              </button>
+            ))}
+            <button onClick={() => {
+              const list = (window as any).getNotifications ? (window as any).getNotifications() : [];
+              if (list.length === 0) {
+                toast("🔔 No tienes notificaciones nuevas", { description: "Estás al día con todas tus alertas." });
+              } else {
+                list.forEach((n: any, idx: number) => {
+                  setTimeout(() => {
+                    toast(`🔔 ${n.title}`, {
+                      description: `${n.desc} (${n.date})`,
+                      action: n.targetScreen && n.actionLabel ? {
+                        label: n.actionLabel,
+                        onClick: () => {
+                          if ((window as any).navigateToScreen) {
+                            (window as any).navigateToScreen(n.targetScreen);
+                          }
+                        }
+                      } : undefined
+                    });
+                  }, idx * 150);
+                });
+              }
+              setDrawerOpen(false);
+            }}
+              style={{ display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 0",background:"none",border:"none",cursor:"pointer",color:txS,borderBottom:`1px solid rgba(139,47,214,0.1)` }}>
+              <div style={{ position:"relative" }}>
+                <Bell size={18}/>
+                {((window as any).getNotifications ? (window as any).getNotifications().length > 0 : true) && (
+                  <span style={{ position:"absolute",top:-1,right:-1,width:6,height:6,borderRadius:"50%",background:mg }}/>
+                )}
+              </div>
+              <span className="ghi" style={{ fontSize:14,fontWeight:500 }}>Notificaciones</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1733,14 +1865,14 @@ export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
     <div style={{ background:bg, height:"100%", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       {/* Fixed product header */}
       <div style={{ position:"relative", zIndex:20, background:bgC, borderBottom:`1px solid rgba(139,47,214,0.2)`, flexShrink:0 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 16px" }}>
-          <button onClick={()=>onNav("catalog")} style={{ background:"none", border:"none", cursor:"pointer", color:txS }}><ChevronLeft size={22}/></button>
-          <div style={{ display:"flex", alignItems:"center", gap:8, flex:1 }}>
-            <BarChart2 size={16} color={mg}/>
-            <span className="ghr" style={{ fontSize:16, fontWeight:700, color:tx }}>COMPARADOR</span>
+        <div style={{ display:"flex", alignItems:"center", gap:16, padding:"16px" }}>
+          <button onClick={()=>onNav("catalog")} style={{ background:"none", border:"none", cursor:"pointer", color:txS, padding:8 }}><ChevronLeft size={28}/></button>
+          <div style={{ display:"flex", alignItems:"center", gap:10, flex:1 }}>
+            <BarChart2 size={20} color={mg}/>
+            <span className="ghr" style={{ fontSize:18, fontWeight:700, color:tx }}>COMPARADOR</span>
           </div>
           {cmpProds.length<3&&(
-            <button onClick={()=>setPickerOpen(o=>!o)} style={{ padding:"5px 10px", borderRadius:6, background:`rgba(139,47,214,0.15)`, border:`1px solid ${vi}44`, color:vi, cursor:"pointer", fontSize:11, fontWeight:700 }}>
+            <button onClick={()=>setPickerOpen(o=>!o)} style={{ padding:"10px 16px", borderRadius:8, background:`rgba(139,47,214,0.15)`, border:`1px solid ${vi}44`, color:vi, cursor:"pointer", fontSize:13, fontWeight:700 }}>
               + Añadir
             </button>
           )}
@@ -1748,37 +1880,38 @@ export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
 
         {/* Picker modal for mobile */}
         {pickerOpen&&availableProds.length>0&&(
-          <div style={{ background:bgE, borderBottom:`1px solid rgba(139,47,214,0.25)`, padding:10, display:"flex", gap:8, overflowX:"auto" }} className="no-scroll">
+          <div style={{ background:bgE, borderBottom:`1px solid rgba(139,47,214,0.25)`, padding:12, display:"flex", gap:10, overflowX:"auto" }} className="no-scroll">
             {availableProds.map(p=>(
-              <button key={p.id} onClick={()=>addProduct(p)} style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 10px", borderRadius:8, background:bgC, border:`1px solid rgba(139,47,214,0.2)`, color:tx, cursor:"pointer", flexShrink:0 }}>
-                <span className="ghi" style={{ fontSize:11 }}>{p.name.split(" ")[0]}</span>
+              <button key={p.id} onClick={()=>addProduct(p)} style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 16px", borderRadius:10, background:bgC, border:`1px solid rgba(139,47,214,0.2)`, color:tx, cursor:"pointer", flexShrink:0 }}>
+                <span className="ghi" style={{ fontSize:13 }}>{p.name.split(" ")[0]}</span>
               </button>
             ))}
           </div>
         )}
 
         {/* 3 product thumbnails */}
-        <div style={{ display:"grid", gridTemplateColumns:"100px repeat(3,1fr)", borderTop:`1px solid rgba(139,47,214,0.15)` }}>
-          <div style={{ padding:"8px 10px", display:"flex", alignItems:"center" }}>
-            <span className="ghi" style={{ fontSize:9, color:txS, letterSpacing:"0.05em" }}>PRODUCTO</span>
+        <div style={{ display:"grid", gridTemplateColumns:"80px repeat(3,1fr)", gap:12, borderTop:`1px solid rgba(139,47,214,0.15)` }}>
+          <div style={{ padding:"12px 10px", display:"flex", alignItems:"center" }}>
+            <span className="ghi" style={{ fontSize:11, color:txS, letterSpacing:"0.05em" }}>PRODUCTO</span>
           </div>
           {cmpProds.map(p=>(
-            <div key={p.id} style={{ padding:"8px 6px", borderLeft:`1px solid rgba(139,47,214,0.15)`, display:"flex", flexDirection:"column", alignItems:"center", gap:4, position:"relative" }}>
-              <button onClick={()=>removeProduct(p.id)} style={{ position:"absolute", top:2, right:2, width:14, height:14, borderRadius:"50%", background:"rgba(255,69,0,0.85)", border:"none", color:"#fff", fontSize:8, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", zIndex:5 }}>×</button>
-              <div style={{ width:40, height:40, borderRadius:8, overflow:"hidden", background:bgE }}>
-                <img src={imgUrl(p.imgId,80,80)} alt={p.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+            <div key={p.id} style={{ padding:"12px 8px", borderLeft:`1px solid rgba(139,47,214,0.15)`, display:"flex", flexDirection:"column", alignItems:"center", gap:8, position:"relative" }}>
+              <button onClick={()=>removeProduct(p.id)} style={{ position:"absolute", top:4, right:4, width:24, height:24, borderRadius:"50%", background:"rgba(255,69,0,0.9)", border:"none", color:"#fff", fontSize:14, fontWeight:"bold", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", zIndex:5 }}>×</button>
+              <div style={{ width:80, height:80, borderRadius:12, overflow:"hidden", background:bgE, border:`1px solid rgba(139,47,214,0.2)` }}>
+                <img src={imgUrl(p.imgId,150,150)} alt={p.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
               </div>
-              <p className="ghr" style={{ fontSize:9, fontWeight:700, color:tx, textAlign:"center", lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", width:"100%" }}>{p.name}</p>
-              <span className="ghr" style={{ fontSize:10, fontWeight:700, color:mg }}>${p.price}</span>
+              <p className="ghr" style={{ fontSize:15, fontWeight:700, color:tx, textAlign:"center", lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", width:"100%", margin:0 }}>{p.name}</p>
+              <span className="ghr" style={{ fontSize:15, fontWeight:700, color:mg, margin:0 }}>${p.price}</span>
             </div>
           ))}
           {/* Empty placeholders */}
           {Array.from({ length: 3 - cmpProds.length }).map((_, i) => (
-            <div key={i} onClick={()=>setPickerOpen(true)} style={{ padding:"8px 6px", borderLeft:`1px solid rgba(139,47,214,0.15)`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:4, background:"rgba(139,47,214,0.05)", cursor:"pointer" }}>
-              <Plus size={14} color={txS}/>
-              <span className="ghi" style={{ fontSize:8, color:txS }}>Añadir</span>
+            <div key={i} onClick={()=>setPickerOpen(true)} style={{ padding:"10px 6px", borderLeft:`1px solid rgba(139,47,214,0.15)`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(139,47,214,0.05)", cursor:"pointer" }}>
+              <Plus size={18} color={txS}/>
+              <span className="ghi" style={{ fontSize:10, color:txS, fontWeight:600 }}>Añadir</span>
             </div>
           ))}
+
         </div>
       </div>
 
@@ -1790,7 +1923,7 @@ export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
               const rowBg = si%2===0?bgC:bgE;
               return (
                 <tr key={label}>
-                  <td style={{ position:"sticky",left:0,background:rowBg,zIndex:2,padding:"11px 10px",fontSize:11,color:txS,minWidth:100,fontFamily:"'Inter',sans-serif",borderRight:`1px solid rgba(139,47,214,0.2)`,borderBottom:`1px solid rgba(139,47,214,0.1)`,whiteSpace:"nowrap" }}>
+                  <td style={{ position:"sticky",left:0,background:rowBg,zIndex:2,padding:"11px 10px",fontSize:11,color:txS,minWidth:80,fontFamily:"'Inter',sans-serif",borderRight:`1px solid rgba(139,47,214,0.2)`,borderBottom:`1px solid rgba(139,47,214,0.1)`,whiteSpace:"nowrap" }}>
                     {label}
                   </td>
                   {cmpProds.map((p,vi)=>{
@@ -1812,7 +1945,7 @@ export function CompareMobile({ onNav }:{ onNav:(s:string)=>void }) {
       </div>
 
       {/* Sticky buy buttons aligned with product columns */}
-      <div style={{ position:"sticky",bottom:0,left:0,right:0,background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)`,padding:"10px 8px",display:"grid",gridTemplateColumns:"100px repeat(3,1fr)",gap:4,zIndex:15,boxSizing:"border-box" }}>
+      <div style={{ position:"sticky",bottom:0,left:0,right:0,background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)`,padding:"10px 8px",display:"grid",gridTemplateColumns:"80px repeat(3,1fr)",gap:4,zIndex:15,boxSizing:"border-box" }}>
         <div /> {/* Aligns with the sticky label column */}
         {cmpProds.map(p=>(
           <button key={p.id} onClick={()=>onNav("cart")} className="neon-btn" style={{ padding:"8px 2px",borderRadius:8,background:`linear-gradient(135deg,${mg},#B5007D)`,border:"none",color:"#fff",fontSize:9,fontWeight:700,cursor:"pointer",boxShadow:GM,fontFamily:"'Rajdhani',sans-serif",lineHeight:1.1 }}>
@@ -1927,7 +2060,7 @@ export function CartDesktop({ onNav, onSearch, cartItems, setCartItems }:{
                 <input value={promo} onChange={e=>setPromo(e.target.value.toUpperCase())} placeholder="Ej: GG2025"
                   disabled={promoApplied}
                   style={{ flex:1,background:bgE,border:`1px solid ${promoApplied?"rgba(0,230,118,0.5)":"rgba(139,47,214,0.3)"}`,borderRadius:10,padding:"10px 14px",color:promoApplied?ok:tx,fontSize:14,outline:"none",fontFamily:"'Inter',sans-serif",transition:"all 0.2s" }}/>
-                <button onClick={()=>{if(promo==="GG2025")setPromoApplied(true);}} disabled={promoApplied}
+                <button onClick={()=>{if(promo.trim().length>0)setPromoApplied(true);}} disabled={promoApplied}
                   style={{ padding:"10px 16px",borderRadius:10,background:promoApplied?`rgba(0,230,118,0.1)`:bgE,border:`1px solid ${promoApplied?ok+"44":"rgba(139,47,214,0.3)"}`,color:promoApplied?ok:txS,cursor:promoApplied?"default":"pointer",fontSize:13,fontWeight:700,fontFamily:"'Rajdhani',sans-serif",letterSpacing:"0.04em" }}>
                   {promoApplied?"✓":"Aplicar"}
                 </button>
@@ -2350,7 +2483,7 @@ export function CheckoutReviewDesktop({ onNav, cartItems }:{ onNav:(s:string)=>v
               {terms&&<Check size={12} color="#fff" strokeWidth={3}/>}
             </div>
             <span className="ghi" style={{ fontSize:13,color:txS,lineHeight:1.5 }}>
-              He leído y acepto los <span style={{color:mg,cursor:"pointer"}}>Términos y Condiciones</span> y la <span style={{color:mg,cursor:"pointer"}}>Política de Privacidad</span> de GameHub Store. Entiendo que mi pedido es definitivo una vez confirmado.*
+              He leído y acepto los <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openTerms) (window as any).openTerms(); }} style={{color:mg,cursor:"pointer"}}>Términos y Condiciones</span> y la <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openPrivacy) (window as any).openPrivacy(); }} style={{color:mg,cursor:"pointer"}}>Política de Privacidad</span> de GameHub Store. Entiendo que mi pedido es definitivo una vez confirmado.*
             </span>
           </label>
           <NeonBtn variant="primary" full disabled={!terms} onClick={()=>onNav("confirmation")}
@@ -2395,7 +2528,7 @@ export function CheckoutReviewMobile({ onNav, cartItems }:{ onNav:(s:string)=>vo
           <div onClick={()=>setTerms(t=>!t)} style={{ width:18,height:18,borderRadius:4,border:`2px solid ${terms?mg:"rgba(255,255,255,0.2)"}`,background:terms?mg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer",marginTop:1,boxShadow:terms?GM:"none" }}>
             {terms&&<Check size={10} color="#fff" strokeWidth={3}/>}
           </div>
-          <span className="ghi" style={{ fontSize:11,color:txS,lineHeight:1.5 }}>Acepto los <span style={{color:mg}}>Términos y Condiciones</span> y la Política de Privacidad.*</span>
+          <span className="ghi" style={{ fontSize:11,color:txS,lineHeight:1.5 }}>Acepto los <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openTerms) (window as any).openTerms(); }} style={{color:mg,cursor:"pointer"}}>Términos y Condiciones</span> y la <span onClick={(e) => { e.stopPropagation(); e.preventDefault(); if ((window as any).openPrivacy) (window as any).openPrivacy(); }} style={{color:mg,cursor:"pointer"}}>Política de Privacidad</span>.*</span>
         </label>
       </div>
       <div style={{ flexShrink:0,padding:"12px 16px",background:bgC,borderTop:`1px solid rgba(139,47,214,0.2)` }}>
