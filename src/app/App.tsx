@@ -108,6 +108,30 @@ const SCREEN_TABS: { id:Screen; label:string; group:0|1|2|3 }[] = [
 
 export default function App() {
   const [screen,     setScreen]     = useState<Screen>("home");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const h = window.location.hash.replace("#", "") as Screen;
+      if (h && h !== screen) {
+        if (SCREEN_TABS.some(t => t.id === h) || h === "login" || h === "register") {
+          setScreen(h);
+        }
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    
+    const initialHash = window.location.hash.replace("#", "");
+    if (initialHash) {
+      if (SCREEN_TABS.some(t => t.id === initialHash as Screen) || initialHash === "login" || initialHash === "register") {
+        setScreen(initialHash as Screen);
+      }
+    } else {
+      window.location.hash = screen;
+    }
+    
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [screen]);
+
   const [role,       setRole]       = useState<AuthRole>("guest");
   const [isMobile,   setIsMobile]   = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -226,6 +250,9 @@ export default function App() {
 
   const nav = (s:string) => {
     setSearchOpen(false);
+    if (window.location.hash !== `#${s}`) {
+      window.location.hash = s;
+    }
     setScreen(s as Screen);
     if (s === "confirmation") {
       const orderNum = Math.floor(Math.random() * 90000) + 10000;
@@ -244,10 +271,10 @@ export default function App() {
     }
   };
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
-  const login  = (r:"user"|"admin") => { setRole(r); setScreen(r==="admin"?"admin-dashboard":"home"); };
+  const login  = (r:"user"|"admin") => { setRole(r); nav(r==="admin"?"admin-dashboard":"home"); };
   const logout = () => { setRole("guest"); setMenuOpen(false); };
 
-  const openDetail = (_p: Product) => { setScreen("detail"); };
+  const openDetail = (_p: Product) => { nav("detail"); };
 
   // Fluid responsive container for mobile viewports (each view scrolls vertically to SimpleFooter)
   const MobileWrapper = ({ children }: { children: React.ReactNode }) => {
